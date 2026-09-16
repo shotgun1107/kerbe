@@ -205,7 +205,7 @@ class ProjectManagementIntegrationTests(unittest.TestCase):
         self.assertIn(PROJECT_ONE, list_output.getvalue())
         self.assertIn(RAW_UNRESOLVED_THREAD, unresolved_output.getvalue())
         self.assertIn("프로젝트 연결 기록 완료", link_output.getvalue())
-        self.assertIn("codex-usage sync", link_output.getvalue())
+        self.assertIn("kerbe sync", link_output.getvalue())
         self.assertIn("프로젝트 별칭 기록 완료", alias_output.getvalue())
 
     def _create_codex_state(self) -> None:

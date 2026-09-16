@@ -36,7 +36,7 @@ from codex_usage.reports.query import ReportQuery, build_usage_report
 from codex_usage.storage.sqlite import LocalStateStore
 
 
-CODE_REPOSITORY = "shotgun1107/codex-usage-tracker"
+CODE_REPOSITORIES = {"shotgun1107/codex-usage-tracker", "shotgun1107/kerbe"}
 SYNTHETIC_TOTAL = 123
 
 
@@ -49,7 +49,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     arguments = parser.parse_args(argv)
     repository = github_repository_name(arguments.remote)
-    if repository.casefold() == CODE_REPOSITORY.casefold():
+    if repository.casefold() in CODE_REPOSITORIES:
         raise RuntimeError("refusing to use the public source repository as a ledger")
     verify_private_repository(repository)
 

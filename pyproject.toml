@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "codex-usage-tracker"
+name = "kerbe"
 dynamic = ["version"]
-description = "Local-first Codex token usage tracking by Git project"
+description = "Kerbe: local-first AI usage ledger by Git project"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["tzdata>=2024.1"]
@@ -19,11 +19,12 @@ classifiers = [
 ]
 
 [project.scripts]
+kerbe = "codex_usage.cli:main"
 codex-usage = "codex_usage.cli:main"
 
 [project.urls]
-Repository = "https://github.com/shotgun1107/codex-usage-tracker"
-Issues = "https://github.com/shotgun1107/codex-usage-tracker/issues"
+Repository = "https://github.com/shotgun1107/kerbe"
+Issues = "https://github.com/shotgun1107/kerbe/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

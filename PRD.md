@@ -1,4 +1,4 @@
-# Codex Usage Tracker v1 PRD
+# Kerbe v1 PRD
 
 상태: 승인됨
 
@@ -88,9 +88,9 @@ flowchart LR
 ### 일상 사용
 
 ```text
-codex-usage collect
-codex-usage sync
-codex-usage report --from 2026-08-01 --group-by project,model
+kerbe collect
+kerbe sync
+kerbe report --from 2026-08-01 --group-by project,model
 ```
 
 ### 수동 프로젝트 연결
@@ -98,8 +98,8 @@ codex-usage report --from 2026-08-01 --group-by project,model
 자동 판별할 수 없는 remote-less 또는 ambiguous 작업은 사용자가 기존 project ID에 연결한다.
 
 ```text
-codex-usage project list
-codex-usage project link --thread <local-thread-id> --project <project-id>
+kerbe project list
+kerbe project link --thread <local-thread-id> --project <project-id>
 ```
 
 원본 thread ID는 로컬 명령 입력에만 사용하고 중앙 장부에는 HMAC key만 저장한다.
@@ -200,13 +200,13 @@ codex-usage project link --thread <local-thread-id> --project <project-id>
 최소 명령:
 
 ```text
-codex-usage init
-codex-usage collect
-codex-usage sync
-codex-usage report
-codex-usage project list
-codex-usage project link
-codex-usage doctor
+kerbe init
+kerbe collect
+kerbe sync
+kerbe report
+kerbe project list
+kerbe project link
+kerbe doctor
 ```
 
 `report` 필터와 그룹:

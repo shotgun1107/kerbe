@@ -1,5 +1,13 @@
 # v1 release smoke checklist
 
+## Kerbe 이름 변경 검증 (2026-09-16)
+
+- 전체 회귀 테스트 175개 통과.
+- 기존 가상환경의 이전 배포 패키지를 제거하고 `kerbe` wheel 설치 성공.
+- 사용자 PATH의 `kerbe` 실행 파일로 CMD·PowerShell에서 도움말 실행 성공; 설치된 JSON Schema 로딩 성공.
+- 기존 `codex-usage` 호환 명령 유지. 로컬 설정·공유키 대상·장부 경로는 변경하지 않음.
+- GitHub 저장소명과 로컬 origin을 `shotgun1107/kerbe`로 변경.
+
 ## 현재 상태
 
 - v1 핵심 Build·Validate: 2026-09-01 완료 기록이 있다.
@@ -19,8 +27,8 @@ python -m pip wheel --no-deps . --wheel-dir dist
 새 가상환경에 wheel을 설치한 뒤 다음 항목을 확인한다.
 
 ```powershell
-codex-usage --version
-codex-usage --help
+kerbe --version
+kerbe --help
 ```
 
 - 설치된 패키지에서 `LedgerSchemaValidator.default()`가 schema를 찾는다.
@@ -81,5 +89,5 @@ python scripts\private_github_smoke.py --remote https://github.com/<owner>/<priv
 - Windows Python 3.12.10: 전체 테스트 174개 모두 통과, skip 없음.
 - 신규 status 테스트 15개: 합성 App Server stdio·오류·시간 초과·종료 정리·다중 버킷·누락값·CLI 초기화 불필요 확인.
 - 실제 codex-cli 0.154.0: 계정 한도 읽기 성공, 일반·별도 모델 버킷과 KST 초기화 시각 표시 확인.
-- wheel 빌드·프로젝트 전용 `.venv` 설치 완료. 소스 checkout 밖에서 설치된 `codex-usage status`와 JSON Schema 로딩 성공.
+- wheel 빌드·프로젝트 전용 `.venv` 설치 완료. 소스 checkout 밖에서 설치된 `kerbe status`와 JSON Schema 로딩 성공.
 - 이번 후속 변경의 원격 CI·정식 출시는 아직 수행하지 않았다.

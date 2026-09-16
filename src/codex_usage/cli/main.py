@@ -131,7 +131,7 @@ def main(
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="codex-usage")
+    parser = argparse.ArgumentParser(prog="kerbe")
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument(
         "--config",
@@ -141,7 +141,7 @@ def _build_parser() -> argparse.ArgumentParser:
     commands = parser.add_subparsers(dest="command", required=True)
 
     initialize = commands.add_parser("init", help="initialize one local device")
-    initialize.add_argument("--ledger", required=True, help="private ledger checkout")
+    initialize.add_argument("--ledger", help="ledger directory (default: local configuration directory/ledger)")
     initialize.add_argument(
         "--codex-home",
         default=str(Path.home() / ".codex"),
@@ -224,7 +224,10 @@ def _run_init(
         if arguments.state_db
         else config_path.parent / "state.sqlite"
     )
-    ledger_root = Path(arguments.ledger).expanduser().resolve()
+    ledger_root = (
+        Path(arguments.ledger).expanduser().resolve()
+        if arguments.ledger else config_path.parent / "ledger"
+    )
     codex_home = Path(arguments.codex_home).expanduser().resolve()
 
     config = AppConfig(
@@ -387,7 +390,7 @@ def _print_mapping_result(
         file=output,
     )
     if result.changed:
-        print("다른 기기와 공유하려면 codex-usage sync를 실행하세요.", file=output)
+        print("다른 기기와 공유하려면 kerbe sync를 실행하세요.", file=output)
 
 
 def _print_table(

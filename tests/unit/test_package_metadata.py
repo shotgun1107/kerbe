@@ -15,6 +15,8 @@ class PackageMetadataTests(unittest.TestCase):
         project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 
         self.assertEqual(project["project"]["dynamic"], ["version"])
+        self.assertEqual(project["project"]["name"], "kerbe")
+        self.assertEqual(project["project"]["scripts"]["kerbe"], "codex_usage.cli:main")
         self.assertEqual(
             project["tool"]["setuptools"]["dynamic"]["version"]["attr"],
             "codex_usage.__version__",

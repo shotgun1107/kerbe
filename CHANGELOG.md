@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-- `codex-usage status`: Codex App Server의 계정 한도 버킷별 남은 비율·초기화 시각·조회 시각 표시
+- 프로젝트·배포 패키지·기본 CLI를 Kerbe / `kerbe`로 변경; `codex-usage` 호환 별칭과 기존 데이터 경로 유지
+
+- Windows 설치 스크립트로 CMD·PowerShell 어디서든 `kerbe` 실행
+- `init`의 장부 경로를 생략하면 로컬 설정 폴더 아래 장부 생성
+
+- `kerbe status`: Codex App Server의 계정 한도 버킷별 남은 비율·초기화 시각·조회 시각 표시
 - 장부 초기화 없이 수동 조회, 시간 초과·오류 처리, 누락값과 지난 reset 시각 구분
 - quota 영속 저장·자동 갱신·reset 소비·그래픽 UI는 포함하지 않음
 

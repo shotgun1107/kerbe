@@ -18,6 +18,18 @@ FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "lifecycle" / "pare
 
 
 class CliIntegrationTests(unittest.TestCase):
+    def test_init_without_ledger_uses_config_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = Path(directory) / "config.json"
+            code = main(
+                ("--config", str(config_path), "init"),
+                secret_store=MemorySecretStore(),
+                stdout=StringIO(),
+            )
+            self.assertEqual(code, 0)
+            self.assertEqual(Path(load_config(config_path).ledger_root), config_path.parent / "ledger")
+            self.assertTrue((config_path.parent / "ledger").is_dir())
+
     def test_init_collect_and_doctor_user_flow(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

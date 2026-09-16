@@ -1,4 +1,4 @@
-# Codex Usage Tracker v1 아키텍처
+# Kerbe v1 아키텍처
 
 상태: 승인됨
 
@@ -28,7 +28,7 @@ flowchart LR
     U["개인 사용자"]
     C1["집 Codex 환경"]
     C2["회사 Codex 환경"]
-    T["Codex Usage Tracker"]
+    T["Kerbe"]
     G["비공개 GitHub 장부"]
     R["CLI·Markdown 보고서"]
 
@@ -42,13 +42,13 @@ flowchart LR
     U --> R
 ```
 
-Codex Usage Tracker는 별도 중앙 서버를 운영하지 않는다. 각 기기의 로컬 프로세스가 같은 비공개 Git 장부를 통해 정제 이벤트만 교환한다.
+Kerbe는 별도 중앙 서버를 운영하지 않는다. 각 기기의 로컬 프로세스가 같은 비공개 Git 장부를 통해 정제 이벤트만 교환한다.
 
 ## C4 Level 2: 컨테이너
 
 ```mermaid
 flowchart TB
-    subgraph Device["한 기기의 Codex Usage Tracker"]
+    subgraph Device["한 기기의 Kerbe"]
         CLI["CLI<br/>init · collect · sync · report · doctor"]
         APP["Application Services<br/>명령 흐름·트랜잭션"]
         SRC["Source Adapters<br/>JSONL · SQLite · Git · Quota"]
@@ -112,7 +112,7 @@ sequenceDiagram
     participant L as Ledger Writer
     participant I as Local SQLite
 
-    U->>C: codex-usage collect
+    U->>C: kerbe collect
     C->>C: single-instance lock
     C->>S: inventory JSONL + SQLite
     S-->>C: threads · edges · source cursors
@@ -149,7 +149,7 @@ sequenceDiagram
     participant P as Privacy Guard
     participant I as Replay/SQLite
 
-    U->>S: codex-usage sync
+    U->>S: kerbe sync
     S->>S: config · key_id · own-device path 검사
     S->>P: staged ledger privacy scan
     P-->>S: pass / fail

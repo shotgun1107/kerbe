@@ -113,7 +113,7 @@
 - 상태: 해결
 - 2026-09-01 결과: `gh`의 기존 `shotgun1107` 토큰이 만료됐고, 재인증 device-code 요청은 현재 샌드박스의 외부 네트워크 차단으로 시작되지 않았다.
 - 안전 처리: 공개 소스 저장소에 장부를 올리거나 실제 회사 로그로 대체 검증하지 않는다.
-- 2026-09-01 사용자 PowerShell 검증: 기존 비공개 `shotgun1107/codex-usage-ledger`의 임시 브랜치에서 합성 123 토큰을 push하고 clean clone의 DB·보고서를 재생성했다.
+- 2026-09-01 사용자 PowerShell 검증: 기존 비공개 `shotgun1107/kerbe-ledger`의 임시 브랜치에서 합성 123 토큰을 push하고 clean clone의 DB·보고서를 재생성했다.
 - 결과: `doctor`의 원격·read-model·classification 검사가 통과했고 임시 원격 브랜치도 삭제됐다.
 - 완료 기준: 충족.
 

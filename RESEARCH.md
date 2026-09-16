@@ -491,7 +491,7 @@ reader가 안전을 위해 반환한 read-only mapping을 replay가 직렬화하
 
 합성 CLI acceptance에서는 첫 수집 4개, 같은 파일 재수집 0개, 새 turn 추가 후 1개만 기록되는 흐름을 검증했다.
 
-배포 검증에서는 wheel을 새 임시 가상환경에 설치해 `codex-usage.exe --version`이 `0.1.0`을 반환하고, 설치된 data 경로에서 ledger JSON Schema를 다시 읽는 것까지 확인했다.
+배포 검증에서는 wheel을 새 임시 가상환경에 설치해 `kerbe.exe --version`이 `0.1.0`을 반환하고, 설치된 data 경로에서 ledger JSON Schema를 다시 읽는 것까지 확인했다.
 
 Windows Credential Manager adapter는 실제 API까지 호출했지만 현재 자동 테스트 호스트에는 interactive logon session이 없어 `WinError 1312`가 반환됐다. 이 경우만 환경상 skip으로 구분했으며, 일반 데스크톱 로그온 세션에서의 최종 acceptance가 남아 있다.
 
@@ -527,10 +527,10 @@ Windows Credential Manager adapter는 실제 API까지 호출했지만 현재 �
 | 도구 | 확인한 방향 | 우리 프로젝트와의 관계 |
 |---|---|---|
 | [CodexBar](https://github.com/steipete/CodexBar) | 여러 제공자의 사용량·한도·비용 표시 | 한도 표시 참고 |
-| [codex-usage](https://github.com/hashmil/codex-usage) | rollout JSONL 기반 CLI 집계 | JSONL 파서 참고 |
+| [kerbe](https://github.com/hashmil/kerbe) | rollout JSONL 기반 CLI 집계 | JSONL 파서 참고 |
 | [token-tracker](https://github.com/JedIV/token-tracker) | JSONL을 SQLite로 정규화하고 웹 UI 제공 | 저장 구조 참고 |
 | [codexometer](https://github.com/merefield/codexometer) | 로컬 토큰과 한도 추정 TUI | 한도 연구 참고 |
-| [codex-usage-analyzer](https://github.com/klinki/codex-usage-analyzer) | JSONL·SQLite·그래프·한도 비교 | 분석 구조 참고 |
+| [kerbe-analyzer](https://github.com/klinki/kerbe-analyzer) | JSONL·SQLite·그래프·한도 비교 | 분석 구조 참고 |
 | [ccusage Codex](https://ccusage.com/guide/codex/) | Codex 일별·모델별 사용량 파싱 | 재사용 가능성 조사 필요 |
 
 기존 도구와 비교한 현재 핵심 방향은 `Git 저장소별 그룹핑`, `여러 기기 통합`, `오케스트레이션 자식 작업 포함`이다.

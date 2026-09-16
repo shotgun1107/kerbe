@@ -1,4 +1,8 @@
-# Codex Usage Tracker
+# Kerbe
+
+프로젝트명과 기본 명령어는 **Kerbe / `kerbe`**입니다. 독일어로 새긴 홈·눈금을 뜻하며, 사용 기록을 하나의 장부에 새긴다는 의미를 담습니다.
+
+이전 `codex-usage` 명령은 호환용 별칭으로 유지합니다. 기존 기록을 이어 쓰도록 로컬 설정 디렉터리 `codex-usage-tracker`, Credential Manager 대상 `CodexUsageTracker/...`, Python 내부 모듈 `codex_usage`와 장부 스키마는 유지합니다. 이름 변경을 위해 다시 초기화할 필요는 없습니다.
 
 여러 기기와 멀티에이전트 작업에 흩어진 Codex 실제 토큰 사용량을 Git 프로젝트별로 통합하는 local-first 개인용 도구입니다.
 
@@ -28,11 +32,32 @@ Codex 대화·코드·명령·로컬 경로·raw remote는 중앙 장부에 저�
 
 ## 현재 CLI 사용법
 
+### Windows 명령어 등록
+
+프로젝트 폴더의 PowerShell에서 한 번 실행합니다.
+
+```powershell
+.\scripts\install_cli.ps1
+```
+
+프로젝트 전용 `.venv`에 설치하고 사용자 PATH에 `kerbe` 실행 파일만 등록합니다. 새 CMD·PowerShell 창에서는 현재 폴더와 관계없이 아래처럼 실행할 수 있습니다. 기존 터미널 앱이 이전 PATH를 유지하면 앱을 완전히 종료한 뒤 다시 엽니다.
+
+```text
+kerbe status
+kerbe init
+kerbe collect
+kerbe report
+```
+
+`init`의 기본 장부는 로컬 설정 폴더 아래 `ledger`입니다. GitHub 연결 없이 로컬 수집·조회부터 시작할 수 있습니다. 다른 기기에서 이미 만든 공유키가 있다면 `init --import-key`를 사용합니다. Git 동기화에는 별도의 비공개 장부 저장소 설정이 필요합니다.
+
+명령어는 프로젝트의 `.venv`를 사용하므로 프로젝트 폴더를 유지해야 합니다. 코드 갱신·폴더 이동 후에는 설치 스크립트를 다시 실행합니다.
+
 ### 남은 구독 한도 조회
 
 ```powershell
-codex-usage status
-codex-usage status --timezone Asia/Seoul --timeout 15
+kerbe status
+kerbe status --timezone Asia/Seoul --timeout 15
 ```
 
 기존 Codex CLI의 ChatGPT 로그인을 통해 계정별 한도 버킷의 남은 비율과 초기화 시각을 조회합니다. `init`이나 프로젝트 장부 설정은 필요하지 않습니다. 기간은 서버 응답대로 표시하므로 항상 5시간·주간 두 창이 모두 나오지는 않습니다. 프로젝트별 토큰 집계는 기존 `report`를 사용합니다.
@@ -58,21 +83,21 @@ python -m pip install -e .
 먼저 별도의 비공개 Git 저장소를 장부용으로 준비한 뒤 첫 기기를 초기화합니다.
 
 ```powershell
-codex-usage init --ledger C:\path\to\private-ledger
+kerbe init --ledger C:\path\to\private-ledger
 ```
 
 첫 초기화에서 표시되는 복구 키는 다른 기기 연결에 필요합니다. Git이나 일반 텍스트 파일에 저장하지 말고 비밀번호 관리자 등에 보관합니다. 두 번째 기기는 다음 명령을 실행하고 복구 키를 화면에 표시되지 않는 입력창에 붙여 넣습니다.
 
 ```powershell
-codex-usage init --ledger C:\path\to\private-ledger --import-key
+kerbe init --ledger C:\path\to\private-ledger --import-key
 ```
 
 수집, 장부 동기화, 진단:
 
 ```powershell
-codex-usage collect
-codex-usage sync
-codex-usage doctor
+kerbe collect
+kerbe sync
+kerbe doctor
 ```
 
 `collect`는 변경되지 않은 rollout을 건너뛰고, 변경된 rollout만 누적 기준선부터 다시 계산한 뒤 이미 저장된 `source_event_id`를 제외합니다. 손상됐거나 계속 쓰이는 파일은 cursor를 전진시키지 않고 다음 실행에서 재시도합니다.
@@ -82,10 +107,10 @@ codex-usage doctor
 프로젝트·날짜별 사용량을 조회하거나 Markdown으로 남깁니다.
 
 ```powershell
-codex-usage report
-codex-usage report --period week --group-by project,date,model
-codex-usage report --from 2026-08-01 --to 2026-08-31 --project <ID-or-name>
-codex-usage report --markdown reports\usage.md
+kerbe report
+kerbe report --period week --group-by project,date,model
+kerbe report --from 2026-08-01 --to 2026-08-31 --project <ID-or-name>
+kerbe report --markdown reports\usage.md
 ```
 
 지원 필터는 project·model·device·source이며, 그룹은 project·date·thread·model·effort·device·source를 조합할 수 있습니다. 날짜는 기본 `Asia/Seoul` 기준입니다. `delta=null` 이벤트는 합계에서 제외하고 건수를 별도로 표시합니다.
@@ -93,11 +118,11 @@ codex-usage report --markdown reports\usage.md
 자동 분류되지 않은 작업을 확인하고 기존 프로젝트에 연결합니다.
 
 ```powershell
-codex-usage project list
-codex-usage project unresolved
-codex-usage project link --thread <raw-thread-id-or-thr_h1-id> --project <prj_h1-id>
-codex-usage project alias --from <old-prj_h1-id> --to <current-prj_h1-id>
-codex-usage sync
+kerbe project list
+kerbe project unresolved
+kerbe project link --thread <raw-thread-id-or-thr_h1-id> --project <prj_h1-id>
+kerbe project alias --from <old-prj_h1-id> --to <current-prj_h1-id>
+kerbe sync
 ```
 
 `project unresolved`는 이 기기의 Codex SQLite에서 원본 thread ID를 찾을 수 있을 때만 로컬 화면에 표시합니다. `project link`는 입력받은 원본 ID를 즉시 HMAC 식별자로 바꾸며 Git 장부에는 원본 ID를 기록하지 않습니다. 같은 연결은 멱등 처리하고, 연결 변경은 이전 mapping을 가리키는 새 revision으로 보존합니다.
@@ -110,7 +135,7 @@ codex-usage sync
 python -m unittest discover -s tests -t . -v
 ```
 
-2026-09-16 Windows에서 status 테스트 15개를 포함한 전체 174개 테스트가 모두 통과했습니다. 실제 codex-cli 0.154.0 연결에서도 한도 조회를 확인했습니다.
+2026-09-16 Windows에서 status 테스트 15개와 기본 장부 초기화 테스트를 포함한 전체 175개 테스트가 모두 통과했습니다. 실제 codex-cli 0.154.0 연결에서도 한도 조회를 확인했습니다. Kerbe 이름 변경 후 CMD·PowerShell 명령 실행과 설치된 스키마 로딩을 확인했습니다.
 
 기존 v1 검증에서는 로컬 bare remote 기반 두 기기의 수집·동기화·수동 연결·보고와 새 clone의 DB 재생성을 확인했습니다. 실제 비공개 GitHub에서는 합성 이벤트의 push·clean clone 재생성·doctor 검사와 임시 브랜치 삭제가 통과했습니다. wheel을 소스 checkout 밖의 새 가상환경에 설치해 version·schema·CLI entrypoint를 검증했습니다. 실제 로컬 익명 검증에서는 사용량 이벤트 56,208개를 70개 프로젝트·날짜 행으로 집계하고 터미널·Markdown 보고서를 0.628초에 생성했습니다.
 
