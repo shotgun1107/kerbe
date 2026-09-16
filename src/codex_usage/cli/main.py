@@ -171,7 +171,8 @@ def _build_parser() -> argparse.ArgumentParser:
         dest="project_command",
         required=True,
     )
-    project_commands.add_parser("list", help="list known projects")
+    project_list = project_commands.add_parser("list", help="list known projects by repository name")
+    project_list.add_argument("--ids", action="store_true", help="also display full project IDs")
     project_commands.add_parser(
         "unresolved",
         help="list unclassified and ambiguous threads",
@@ -269,6 +270,11 @@ def _run_collect(config: AppConfig, shared_key: bytes, output: TextIO) -> int:
     )
     if not result.sqlite_lineage_available:
         print("경고: Codex SQLite 계보 없이 JSONL fallback을 사용했습니다.", file=output)
+    if result.excluded_checkpoint_count:
+        print(
+            f"안내: 상속 기준값 또는 증가량 미확인 기록 {result.excluded_checkpoint_count}개는 토큰 합계에서 제외했습니다.",
+            file=output,
+        )
     if result.busy_files:
         print(
             f"경고: 쓰기 중인 rollout {result.busy_files}개는 다음 수집에서 재시도합니다.",
@@ -321,16 +327,15 @@ def _run_project(
     if arguments.project_command == "list":
         rows = service.list_projects()
         _print_table(
-            ("project_id", "name", "tokens", "threads", "events", "excluded"),
+            ("project", "tokens", "threads", "events", "excluded") + (("project_id",) if arguments.ids else ()),
             tuple(
                 (
-                    row.project_id,
-                    row.name or "-",
+                    row.name or row.project_id,
                     f"{row.total_tokens:,}",
                     f"{row.thread_count:,}",
                     f"{row.included_events:,}",
                     f"{row.excluded_events:,}",
-                )
+                ) + ((row.project_id,) if arguments.ids else ())
                 for row in rows
             ),
             output,

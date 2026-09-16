@@ -26,6 +26,7 @@ from codex_usage.privacy.identifiers import (
 from codex_usage.sources.codex_sqlite import SqliteAdapterError, load_thread_inventory
 from codex_usage.storage.read_model import ReadModelState
 from codex_usage.storage.sqlite import LocalStateStore
+from codex_usage.reports.query import _load_names
 
 
 _PROJECT_ID = re.compile(r"prj_h1_[A-Za-z0-9_-]{43}")
@@ -83,22 +84,7 @@ class ProjectManagementService:
     def list_projects(self) -> tuple[ProjectSummary, ...]:
         connection = _read_model_connection(self.config.state_db)
         try:
-            aliases = {
-                row["source_project_id"]: row["target_project_id"]
-                for row in connection.execute(
-                    "SELECT source_project_id, target_project_id FROM project_aliases"
-                )
-            }
-            names: dict[str, str] = {}
-            for row in connection.execute(
-                """
-                SELECT subject_id, display_value
-                FROM mapping_events
-                WHERE kind = 'project_name' AND display_value IS NOT NULL
-                ORDER BY occurred_at, event_id
-                """
-            ):
-                names[_resolve_alias(row["subject_id"], aliases)] = row["display_value"]
+            names, _ = _load_names(connection)
             rows = connection.execute(
                 """
                 SELECT effective_project_id AS project_id,

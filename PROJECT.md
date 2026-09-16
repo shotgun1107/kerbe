@@ -103,7 +103,8 @@ flowchart LR
 
 - 추가됨: `status`로 Codex가 보고한 남은 구독 한도와 초기화 시각 수동 조회
 - 후속 검토: quota snapshot 영속 수집·다기기 공유
-- TODO: Codex 채팅 여백에 현재 프로젝트 사용량 UI 표시
+- 보류: 연구 목적의 프로젝트 귀속·자식 작업 일괄 연결은 [1차 마무리 TODO](PHASE1_REVIEW_TODO.md)에서 관리
+- UI: 사용자 재요청 전까지 제안·구현하지 않음. 현재 제품은 CLI 중심
 
 ## 관련 문서
 

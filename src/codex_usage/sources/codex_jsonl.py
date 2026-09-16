@@ -80,6 +80,9 @@ def parse_rollout(lines: Iterable[str]) -> RolloutParseResult:
     current_model: str | None = None
     current_effort: str | None = None
     activity_by_turn: dict[str, set[str]] = {}
+    saw_task_started = False
+    inherited_counter_prefix = False
+    copied_session_metadata = False
 
     for record_index, line in enumerate(lines, start=1):
         try:
@@ -97,6 +100,8 @@ def parse_rollout(lines: Iterable[str]) -> RolloutParseResult:
         if outer_type == "session_meta":
             if metadata is None:
                 metadata = _parse_metadata(payload, record_index)
+            elif payload.get("id") != metadata.thread_id:
+                copied_session_metadata = True
             continue
 
         if outer_type == "turn_context":
@@ -119,6 +124,8 @@ def parse_rollout(lines: Iterable[str]) -> RolloutParseResult:
 
         if outer_type == "compacted":
             current_operation = Operation.COMPACT
+            if metadata is not None and metadata.forked_from_id and not checkpoints and not saw_task_started:
+                inherited_counter_prefix = True
             continue
 
         if outer_type != "event_msg":
@@ -126,6 +133,8 @@ def parse_rollout(lines: Iterable[str]) -> RolloutParseResult:
 
         event_type = payload.get("type")
         if event_type == "task_started":
+            saw_task_started = True
+            inherited_counter_prefix = False
             current_turn_id = _optional_string(payload.get("turn_id"))
             current_ordinal = 0
             current_operation = Operation.TURN
@@ -184,7 +193,7 @@ def parse_rollout(lines: Iterable[str]) -> RolloutParseResult:
             RawTokenCheckpoint(
                 rollout_thread_id=metadata.thread_id,
                 rollout_forked_from_id=metadata.forked_from_id,
-                turn_id=current_turn_id,
+                turn_id=None if inherited_counter_prefix else current_turn_id,
                 token_event_ordinal=ordinal,
                 record_index=record_index,
                 occurred_at=occurred_at,
@@ -193,6 +202,16 @@ def parse_rollout(lines: Iterable[str]) -> RolloutParseResult:
                 reasoning_effort=current_effort,
                 cumulative=cumulative,
                 reported_last=reported_last,
+                turn_scope=(
+                    metadata.thread_id
+                    if current_turn_id and re.fullmatch(r"rollout-\d+", current_turn_id)
+                    else None
+                ),
+                inherited_baseline=inherited_counter_prefix,
+                missing_fork_baseline=bool(
+                    metadata.forked_from_id and not checkpoints
+                    and not copied_session_metadata and not inherited_counter_prefix
+                ),
             )
         )
 

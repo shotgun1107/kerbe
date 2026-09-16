@@ -59,7 +59,7 @@ class UsageEventEncoder:
         if checkpoint.turn_id is not None:
             return source_event_id(
                 self._key,
-                checkpoint.turn_id,
+                checkpoint.identity_turn_id,
                 checkpoint.token_event_ordinal,
             )
         digest = _fallback_payload_digest(event)
@@ -110,7 +110,7 @@ class UsageEventEncoder:
                 self._key,
                 metadata.forked_from_id,
             ),
-            "turn_key": _optional_turn_key(self._key, checkpoint.turn_id),
+            "turn_key": _optional_turn_key(self._key, checkpoint.identity_turn_id),
             "token_event_ordinal": checkpoint.token_event_ordinal,
             "operation": checkpoint.operation.value,
             "occurred_at": checkpoint.occurred_at.isoformat().replace(

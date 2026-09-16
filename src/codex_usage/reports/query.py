@@ -10,6 +10,7 @@ import sqlite3
 from types import MappingProxyType
 from typing import Mapping
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from codex_usage.storage.project_names import load_local_project_names
 
 
 GROUP_DIMENSIONS = (
@@ -232,6 +233,12 @@ def _load_names(
         )
     }
     project_names: dict[str, str] = {}
+    local_names = load_local_project_names(connection)
+    for project, label in sorted(local_names.items()):
+        project_names.setdefault(_resolve_alias(project, aliases), _single_line(label))
+    for project, label in local_names.items():
+        if project not in aliases:
+            project_names[project] = _single_line(label)
     device_names: dict[str, str] = {}
     rows = connection.execute(
         """

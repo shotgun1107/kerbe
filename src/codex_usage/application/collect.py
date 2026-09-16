@@ -8,6 +8,8 @@ from pathlib import Path
 from types import MappingProxyType
 
 from codex_usage import __version__
+from codex_usage.domain.git_remote import normalize_remote, RemoteNormalizationError
+from codex_usage.storage.project_names import remember_project_names
 from codex_usage.application.project_attribution import ProjectAttributionEngine
 from codex_usage.application.lock import ApplicationLock
 from codex_usage.config import AppConfig
@@ -19,7 +21,7 @@ from codex_usage.domain.lifecycle import (
 from codex_usage.ledger.jsonl import LedgerFlushResult, LedgerReader, LedgerWriter
 from codex_usage.ledger.replay import replay_ledger_events
 from codex_usage.privacy.encoder import UsageEventEncoder
-from codex_usage.privacy.identifiers import key_id
+from codex_usage.privacy.identifiers import key_id, source_event_id
 from codex_usage.sources.codex_jsonl import (
     RolloutParseError,
     RolloutParseResult,
@@ -69,6 +71,7 @@ class CollectResult:
     ledger_event_count: int
     ledger_partial_line_issues: int
     read_model_state: ReadModelState
+    excluded_checkpoint_count: int = 0
 
 
 class CollectService:
@@ -126,6 +129,15 @@ class CollectService:
         )
 
         inventory, sqlite_available = _load_inventory(Path(self.config.codex_home))
+        name_candidates: set[str] = set()
+        for thread in inventory.threads.values():
+            if thread.git_origin_url:
+                try:
+                    canonical = normalize_remote(thread.git_origin_url)
+                    if canonical:
+                        name_candidates.add(canonical)
+                except RemoteNormalizationError:
+                    pass
         paths = discover_rollout_files(self.config.codex_home)
         cursors = store.all_cursors()
         snapshots: list[RolloutFileSnapshot] = []
@@ -173,6 +185,13 @@ class CollectService:
                 )
                 continue
             parsed_by_source[snapshot.source_id] = parsed
+            if parsed.metadata.git_repository_url:
+                try:
+                    canonical = normalize_remote(parsed.metadata.git_repository_url)
+                    if canonical:
+                        name_candidates.add(canonical)
+                except RemoteNormalizationError:
+                    pass
             metadata_by_thread.setdefault(parsed.metadata.thread_id, parsed.metadata)
             source_by_thread.setdefault(parsed.metadata.thread_id, snapshot.source_id)
             parser_issue_count += len(parsed.issues)
@@ -181,7 +200,7 @@ class CollectService:
         try:
             logical_events = deduplicate_events(calculated)
         except DuplicateCheckpointConflict as error:
-            raise CollectError("logical token checkpoints conflict") from error
+            raise CollectError("토큰 기록 충돌로 수집을 중단했습니다. 초기화 경로 문제가 아니며 장부를 초기화하지 마세요.") from error
 
         events_by_source: dict[str, list[dict[str, object]]] = defaultdict(list)
         existing_usage_events = 0
@@ -199,6 +218,16 @@ class CollectService:
                 attributed,
                 strict=True,
             ):
+                checkpoint = calculated_event.checkpoint
+                identity = attributed_checkpoint.attribution.project_identity
+                if identity:
+                    name_candidates.add(identity)
+                if checkpoint.turn_scope and checkpoint.turn_id:
+                    old_source_id = source_event_id(
+                        self.shared_key, checkpoint.turn_id, checkpoint.token_event_ordinal,
+                    )
+                    if old_source_id in known_source_ids:
+                        raise CollectError("구형 로컬 turn ID로 저장된 장부의 정정이 필요합니다. 중복 합산을 막기 위해 중단했습니다.")
                 logical_source_id = self.encoder.source_id(calculated_event)
                 if logical_source_id in known_source_ids:
                     existing_usage_events += 1
@@ -276,6 +305,7 @@ class CollectService:
             expected_key_id=self.config.key_id,
         )
         read_model_state = store.rebuild_read_model(replay)
+        remember_project_names(self.config.state_db, self.shared_key, name_candidates)
 
         return CollectResult(
             discovered_files=len(paths),
@@ -296,6 +326,7 @@ class CollectService:
                 len(ledger_before.issues) - flushed.partial_tails_recovered,
             ),
             read_model_state=read_model_state,
+            excluded_checkpoint_count=sum(event.delta is None for event in logical_events),
         )
 
 

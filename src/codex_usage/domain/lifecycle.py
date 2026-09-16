@@ -37,7 +37,13 @@ def calculate_deltas(
         if cumulative.is_total_consistent() is False:
             flags.append("token_total_mismatch")
 
-        if previous is None:
+        if checkpoint.inherited_baseline:
+            delta = None
+            flags.append("fork_inherited_baseline")
+        elif previous is None and checkpoint.missing_fork_baseline:
+            delta = None
+            flags.append("fork_missing_baseline")
+        elif previous is None:
             delta = cumulative
         elif _total_regressed(cumulative, previous):
             delta = None
@@ -108,6 +114,9 @@ def deduplicate_events(
             selected[key] = event
             continue
 
+        if _checkpoint_value(existing) == _checkpoint_value(event):
+            existing = _fill_missing_baseline(existing, event)
+            event = _fill_missing_baseline(event, existing)
         if _semantic_value(existing) != _semantic_value(event):
             raise DuplicateCheckpointConflict(
                 f"conflicting token checkpoint for logical key {key!r}"
@@ -158,6 +167,25 @@ def _subtract(
 
 
 def _semantic_value(event: CalculatedTokenEvent) -> tuple[object, ...]:
+    return (*_checkpoint_value(event), event.delta, tuple(
+        flag for flag in event.flags if not flag.startswith("metadata_conflict:")
+    ))
+
+
+def _fill_missing_baseline(
+    missing: CalculatedTokenEvent, known: CalculatedTokenEvent,
+) -> CalculatedTokenEvent:
+    # Only repair an explicitly unknown first delta from an identical checkpoint
+    # whose counter prefix is available. Conflicting known deltas still fail.
+    if missing.delta is None and "fork_missing_baseline" in missing.flags and known.delta is not None:
+        flags = set(known.flags) | {
+            flag for flag in missing.flags if flag.startswith("metadata_conflict:")
+        }
+        return replace(missing, delta=known.delta, flags=tuple(sorted(flags)))
+    return missing
+
+
+def _checkpoint_value(event: CalculatedTokenEvent) -> tuple[object, ...]:
     checkpoint = event.checkpoint
     return (
         checkpoint.turn_id,
@@ -165,12 +193,6 @@ def _semantic_value(event: CalculatedTokenEvent) -> tuple[object, ...]:
         checkpoint.operation,
         checkpoint.cumulative,
         checkpoint.reported_last,
-        event.delta,
-        tuple(
-            flag
-            for flag in event.flags
-            if not flag.startswith("metadata_conflict:")
-        ),
     )
 
 

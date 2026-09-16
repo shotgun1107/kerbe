@@ -6,6 +6,15 @@
 
 본문의 조사 수치와 버전은 각 실험 당시의 관측값이다. v1 핵심 Build·Validate는 2026-09-01 완료됐으며, 최종 검증 결과는 [RELEASE.md](RELEASE.md)를 따른다. 2026-09-16에는 문서 상태 정리 후 사용자 요청으로 status 기능을 구현·검증했다.
 
+## 실사용 collect 충돌 수정 (2026-09-16)
+
+- 사용자 첫 collect에서 logical checkpoint conflict로 중단되는 문제를 재현했다. 초기화 위치와는 무관했다.
+- 로컬 구조 비교에서 구형 `rollout-N` 복원 turn ID의 파일 간 재사용과 압축된 fork의 상속 누적값을 확인했다. 원문 대화·경로·ID를 이 문서에 보존하지 않는다.
+- 복원 turn ID의 thread 범위 분리, 상속 카운터 제외, 누락 기준값의 보수적 처리를 적용한 읽기 검증에서 충돌 0건을 확인했다.
+- 회귀 테스트 179개 통과. 수집 안내 추가 후 관련 CLI·collect·새 fork 테스트 12개도 통과했다.
+- 실제 로컬 collect: 신규 이벤트 72,006개 저장, 미분류 14,849개, 합계 제외 기준값·미확인 이벤트 303개, 손상 파일 2개 격리. 이어서 report 출력 성공. 개인 장부의 원격 전송은 수행하지 않았다.
+- 설치본을 갱신했다. 실제 토큰 수치는 이 기록에 보존하지 않는다.
+
 ## 후속 구현 검증: 계정 한도 status (2026-09-16)
 
 - 공식 문서 확인: [Codex App Server](https://learn.chatgpt.com/docs/app-server)의 initialize·initialized 및 account/rateLimits/read 절차, 다중 버킷 우선 조회, usedPercent·windowDurationMins·resetsAt 필드 의미를 확인했다.

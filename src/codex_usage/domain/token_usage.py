@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
+import json
 from typing import ClassVar, Mapping
 
 
@@ -89,6 +90,9 @@ class RawTokenCheckpoint:
     cumulative: TokenCounts
     reported_last: TokenCounts | None
     activity_workdirs: tuple[str, ...] = ()
+    turn_scope: str | None = None
+    inherited_baseline: bool = False
+    missing_fork_baseline: bool = False
 
     def __post_init__(self) -> None:
         if not self.rollout_thread_id:
@@ -103,11 +107,19 @@ class RawTokenCheckpoint:
             raise TokenDataError("cumulative total_tokens is required")
 
     @property
+    def identity_turn_id(self) -> str | None:
+        if self.turn_id is None or self.turn_scope is None:
+            return self.turn_id
+        return "local-turn:v1:" + json.dumps(
+            [self.turn_scope, self.turn_id], separators=(",", ":"), ensure_ascii=True,
+        )
+
+    @property
     def logical_key(self) -> tuple[str, str, int]:
         """Return the raw logical key used before HMAC encoding."""
 
         if self.turn_id is not None:
-            return ("turn", self.turn_id, self.token_event_ordinal)
+            return ("turn", self.identity_turn_id, self.token_event_ordinal)
         return ("record", self.rollout_thread_id, self.record_index)
 
 

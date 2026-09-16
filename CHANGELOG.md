@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- 프로젝트 목록·보고서에서 로컬 Git 근거로 확인한 저장소 이름 표시, 전체 ID는 `project list --ids`로 조회
+
+- 구형 `rollout-N` turn ID를 파일의 thread 범위로 구분해 수집 충돌 방지
+- 압축된 fork의 상속 카운터와 기준값이 없는 첫 이벤트를 새 사용량으로 합산하지 않음
+- 동일 체크포인트의 온전한 카운터 이력이 있을 때만 미확인 delta 보완; 실제 수치 충돌은 계속 중단
+
 - 프로젝트·배포 패키지·기본 CLI를 Kerbe / `kerbe`로 변경; `codex-usage` 호환 별칭과 기존 데이터 경로 유지
 
 - Windows 설치 스크립트로 CMD·PowerShell 어디서든 `kerbe` 실행

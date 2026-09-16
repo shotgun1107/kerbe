@@ -117,6 +117,8 @@ kerbe report --markdown reports\usage.md
 
 자동 분류되지 않은 작업을 확인하고 기존 프로젝트에 연결합니다.
 
+`collect`는 확인한 Git 저장소 이름을 로컬 DB에 보관합니다. `report`와 `project list`는 익명 ID 대신 `소유자/저장소명`을 표시하며, 이름을 확인하지 못한 경우만 ID를 표시합니다. 이름 대응표는 공유 장부에 전송하지 않습니다. 원래 ID가 필요하면 `kerbe project list --ids`를 사용합니다. 저장소 이름 변경 전 기록에는 당시 이름이 표시될 수 있습니다.
+
 ```powershell
 kerbe project list
 kerbe project unresolved
@@ -135,11 +137,13 @@ kerbe sync
 python -m unittest discover -s tests -t . -v
 ```
 
-2026-09-16 Windows에서 status 테스트 15개와 기본 장부 초기화 테스트를 포함한 전체 175개 테스트가 모두 통과했습니다. 실제 codex-cli 0.154.0 연결에서도 한도 조회를 확인했습니다. Kerbe 이름 변경 후 CMD·PowerShell 명령 실행과 설치된 스키마 로딩을 확인했습니다.
+2026-09-16 Windows에서 구형 fork 수집 오류 수정과 로컬 프로젝트 이름 표시를 포함한 전체 182개 테스트가 모두 통과했습니다. 실제 codex-cli 0.154.0 연결에서도 한도 조회를 확인했습니다. Kerbe 이름 변경 후 CMD·PowerShell 명령 실행과 설치된 스키마 로딩을 확인했습니다. 로컬 장부의 프로젝트 9개에 저장소 이름을 대응시켜 목록·보고서의 합계 변화 없이 표시되는 것을 확인했습니다.
 
 기존 v1 검증에서는 로컬 bare remote 기반 두 기기의 수집·동기화·수동 연결·보고와 새 clone의 DB 재생성을 확인했습니다. 실제 비공개 GitHub에서는 합성 이벤트의 push·clean clone 재생성·doctor 검사와 임시 브랜치 삭제가 통과했습니다. wheel을 소스 checkout 밖의 새 가상환경에 설치해 version·schema·CLI entrypoint를 검증했습니다. 실제 로컬 익명 검증에서는 사용량 이벤트 56,208개를 70개 프로젝트·날짜 행으로 집계하고 터미널·Markdown 보고서를 0.628초에 생성했습니다.
 
 ## 문서
+
+- [1차 마무리·대화 복기·후속 TODO](PHASE1_REVIEW_TODO.md)
 
 - [프로젝트 브리프](PROJECT.md)
 - [v1 PRD](PRD.md)

@@ -175,6 +175,10 @@ unclassified
 
 ## token 계산
 
+구형 복원 기록의 `rollout-N` 형식 turn ID는 전역 UUID가 아니다. 이 경우 `[rollout thread ID, 원래 turn ID]`의 canonical JSON에 `local-turn:v1:` 접두사를 붙인 로컬 식별값을 기존 turn·source HMAC 입력으로 사용한다. 원문 값은 장부에 저장하지 않는다. 기존 UUID 기반 키는 변경하지 않는다.
+
+압축된 fork의 task 시작 전 누적 스냅샷은 `fork_inherited_baseline`으로 보존하고 delta는 null로 둔다. 복사된 원본 이력이나 상속 스냅샷 없이 시작한 fork의 첫 delta도 `fork_missing_baseline`으로 null 처리한다. 이후 이벤트는 관측된 누적값을 기준으로 계산한다. 같은 logical checkpoint의 토큰·operation 값이 일치하고 다른 복사본에 정상 delta가 있을 때만 missing baseline을 보완한다. 서로 다른 정상 delta를 임의로 선택하지 않는다.
+
 ```text
 delta = 현재 cumulative - 같은 counter 구간의 이전 cumulative
 ```
@@ -310,6 +314,8 @@ ledger/
 - `manual_assignment`와 `project_alias`의 같은 logical key를 다시 지정하면 기존 줄을 수정하지 않고 `revision + 1`과 `supersedes`로 연결한다.
 
 ## 로컬 상태 DB
+
+`local_project_names`는 HMAC project ID와 로컬에서 확인한 Git 저장소 표시명의 대응표다. 공유 이벤트가 아니며 장부 replay로 삭제하지 않는다. 수동 `project_name` 표시명이 있으면 그것을 우선하고, 확인되지 않은 이름을 추측하거나 이름으로 사용량을 병합하지 않는다.
 
 Git에 올리지 않는 SQLite는 operational state와 재생성 가능한 read model을 같은 파일의 별도 테이블로 관리한다.
 
