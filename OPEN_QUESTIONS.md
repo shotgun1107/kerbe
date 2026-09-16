@@ -1,6 +1,8 @@
 # 미확인 사항과 검증 계획
 
-상태: 조사 중
+상태: v1 핵심 Build·Validate 완료 · 잔여 조사 및 최초 실사용 확인 항목 관리
+
+상태 정리: 2026-09-16. 기존 결정과 검증 기록을 대조한 갱신이며, 새 실험이나 기능 승인을 뜻하지 않는다.
 
 로그를 확인해야 답을 얻는 `검증 항목`과 사용자가 선택해야 하는 `설계 결정`을 분리한다.
 
@@ -14,7 +16,8 @@
 - 결과: fork 이후 새 작업만 새로운 `turn_id`를 사용했으며 부모 누적값은 변하지 않았다.
 - 결과: compact는 누적값을 유지했지만 세부 항목이 0인 별도 `last_token_usage.total_tokens`를 기록했다.
 - 남은 질문: compact의 불투명한 reported last가 실제 모델 사용량·계정 한도에 포함되는가?
-- 완료 기준: compact overhead의 의미와 합산 정책을 정한다.
+- 확정 정책: 불투명한 reported last는 보존하되 일반 프로젝트 총합에서 제외한다(D-021).
+- 남은 검증 완료 기준: compact overhead의 실제 의미를 확인한다. 합산 정책 변경은 별도 결정으로 다룬다.
 
 ### Q-002. JSONL과 SQLite의 역할
 
@@ -63,8 +66,9 @@
 - Build 검증: turn 활동 Git·자기 Git·계보 합의까지 적용해 logical checkpoint 54,004개 중 43,989개(약 81.5%)를 자동 귀속했다.
 - Build 검증: 근거가 부족한 10,015개는 잘못 합치지 않고 `unclassified`로 유지했다.
 - 결정: remote 없는 저장소는 append-only `local_repo_link` 수동 매핑으로 여러 기기에서 같은 project ID에 연결한다(D-034).
-- 남은 질문: 실제 사용자 흐름에서 수동 매핑을 입력·검토하는 CLI 모양.
-- 완료 기준: `collect --map-project` 계열 CLI acceptance test에서 다기기 매핑을 재현한다.
+- 구현 확인: `project list`, `project unresolved`, `project link`, `project alias` CLI가 존재한다. thread·turn 수동 연결은 D-048에 따라 mapping 이벤트로 기록한다.
+- 검증 기록: 수동 연결의 멱등성·revision과 두 기기의 collect·sync·link·report·clean rebuild 수용 검증을 완료했다.
+- 남은 확인: D-034의 `local_repo_link`와 현재 thread·turn 연결 CLI의 적용 범위가 실제 remote-less 다기기 사용 요구를 충족하는지 별도로 대조한다. CLI가 미정이라는 과거 질문은 종료한다.
 
 ### Q-006. 캐시 read/write와 토큰 필드의 버전 차이
 
@@ -81,16 +85,18 @@
 
 ### Q-008. 기존 도구 재사용
 
+- 상태: v1 자체 파서 구현 완료 · 재사용 비교 조사는 후속 후보
 - 질문: ccusage 또는 다른 오픈소스 파서를 재사용할 수 있는가?
 - 확인 내용: 라이선스, 지원 필드, 버전 호환, 증분 읽기, fork 처리.
 - 완료 기준: 재사용·부분 차용·자체 구현 중 하나를 근거와 함께 선택한다.
 
 ### Q-009. 한 turn에서 여러 저장소를 사용한 경우
 
+- 상태: 귀속 정책 확정 · 추가 실측 여부는 미확인
 - 질문: 한 turn이 둘 이상의 Git 저장소를 건드렸을 때 토큰을 어느 프로젝트에 귀속할 것인가?
 - 현재 한계: token_count는 모델 응답 구간의 사용량이지 저장소별 사용량이 아니므로 정확한 분할 근거가 없다.
-- 제안: 자동 분할하지 않고 `ambiguous_multi_repo`로 저장한 뒤 수동 지정한다.
-- 완료 기준: 실제 다중 저장소 turn을 만들고 활동 workdir 집합과 토큰 이벤트 순서를 비교한다.
+- 확정 정책: 자동 분할하지 않고 `ambiguous_multi_repo`로 저장한 뒤 수동 지정한다(D-035).
+- 추가 조사 후보: 실제 다중 저장소 turn의 활동 workdir 집합과 토큰 이벤트 순서를 비교한다. 이번 상태 정리에서는 실험하지 않았다.
 
 ### Q-010. Windows Credential Manager 실사용 acceptance
 
@@ -128,12 +134,12 @@
 
 결정 상태는 [DECISIONS.md](DECISIONS.md)에서 관리한다.
 
-## 다음 Spike 순서
+## 기존 Spike 완료 기록
 
 1. ~~JSONL·SQLite source map과 조인 키 확인~~ — 기존 로그 기준 완료
-2. ~~fork·resume·compact 토큰 기준선 실험~~ — 현재 CLI 버전 기준 완료, compact overhead 의미는 결정 대기
+2. ~~fork·resume·compact 토큰 기준선 실험~~ — 당시 CLI 버전 기준 완료, compact overhead 의미는 미확인·총합 제외 정책은 D-021로 확정
 3. ~~CLI·백그라운드·오케스트레이션 귀속 통제 실험~~ — 완료, turn 활동 위치가 필요한 사례 확인
-4. ~~Git 메타데이터 누락과 미분류 폴백 실험~~ — 완료, local-only 연결 방식은 결정 대기
+4. ~~Git 메타데이터 누락과 미분류 폴백 실험~~ — 완료, local-only 수동 연결 정책은 D-034로 확정
 
 ## Shape & Spike 종료 점검
 
@@ -144,4 +150,12 @@
 - 결정 확정: 완료
 - PRD·스키마 명세: 완료
 - C4·ADR 설계: 승인 완료
-- 현재 단계: Build 진행 중
+- 현재 단계: v1 핵심 Build·Validate 완료(2026-09-01 기록 기준)
+
+## 후속 범위와 실사용 확인
+
+- 정식 출시: `CHANGELOG.md`는 0.1.0 release candidate 상태다. 핵심 검증 완료와 정식 출시 완료를 구분한다.
+- 최초 실사용: 두 기기 복구 키 import 후 같은 key ID 확인은 `RELEASE.md` 체크리스트에 남아 있다.
+- quota·reset: D-047에 따른 후속 범위다. 다중 버킷 계약, 계정 식별, 개인정보·회사 정책, 저장 범위는 미확정이며 수집 구현 시작도 승인되지 않았다.
+- UI: D-013에 따라 보류한다. 표시 위치·방식과 현재 호스트 지원은 미확정이다.
+- 2026-09-16 quota·UI 인계 보고서는 조사·제안 자료다. 보고서의 API 실험 결과는 이번 정리에서 재검증하지 않았고, 트레이·플러그인·스키마 변경 제안을 확정 결정으로 편입하지 않는다.

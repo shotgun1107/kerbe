@@ -1,7 +1,10 @@
 # 자료조사 및 검증 기록
 
-상태: 진행 중  
-최근 갱신: 2026-08-26
+상태: v1 핵심 검증 기록 보존 · 후속 조사 미확정
+
+최근 문서 갱신: 2026-09-16
+
+본문의 조사 수치와 버전은 각 실험 당시의 관측값이다. 이번 갱신은 기존 완료 기록과의 상태 정리이며 새 실험 결과를 추가한 것이 아니다. v1 핵심 Build·Validate는 2026-09-01 완료됐으며, 최종 검증 결과는 [RELEASE.md](RELEASE.md)를 따른다.
 
 조사 내용은 `공식 문서`, `로컬 확인`, `외부 자료`, `미검증 제보`로 구분한다.
 
@@ -482,6 +485,8 @@ reader가 안전을 위해 반환한 read-only mapping을 replay가 직렬화하
 배포 검증에서는 wheel을 새 임시 가상환경에 설치해 `codex-usage.exe --version`이 `0.1.0`을 반환하고, 설치된 data 경로에서 ledger JSON Schema를 다시 읽는 것까지 확인했다.
 
 Windows Credential Manager adapter는 실제 API까지 호출했지만 현재 자동 테스트 호스트에는 interactive logon session이 없어 `WinError 1312`가 반환됐다. 이 경우만 환경상 skip으로 구분했으며, 일반 데스크톱 로그온 세션에서의 최종 acceptance가 남아 있다.
+
+후속 결과(2026-09-01): 일반 Windows 사용자 PowerShell에서 Credential Manager 왕복 테스트가 통과했다. 위 문장은 2026-08-27 당시의 상태이며, adapter acceptance는 완료됐다. 실제 두 기기의 복구 키 import 확인은 최초 실사용 체크리스트에 남아 있다([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) Q-010).
 
 ## Build 검증: 실제 report CLI (2026-08-27)
 
