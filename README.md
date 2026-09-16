@@ -28,6 +28,21 @@ Codex 대화·코드·명령·로컬 경로·raw remote는 중앙 장부에 저�
 
 ## 현재 CLI 사용법
 
+### 남은 구독 한도 조회
+
+```powershell
+codex-usage status
+codex-usage status --timezone Asia/Seoul --timeout 15
+```
+
+기존 Codex CLI의 ChatGPT 로그인을 통해 계정별 한도 버킷의 남은 비율과 초기화 시각을 조회합니다. `init`이나 프로젝트 장부 설정은 필요하지 않습니다. 기간은 서버 응답대로 표시하므로 항상 5시간·주간 두 창이 모두 나오지는 않습니다. 프로젝트별 토큰 집계는 기존 `report`를 사용합니다.
+
+PATH에 Codex가 없으면 Windows의 `%LOCALAPPDATA%\Programs\Codex*` 설치 폴더에서 번들 엔진을 찾습니다. 여러 엔진이 있으면 파일 수정 시각이 가장 최근인 것을 선택합니다. 직접 선택하려면 `--codex-path 'C:\path\to\codex.exe'`로 지정합니다. Windows의 `.cmd`·`.bat`·`.ps1` 래퍼는 지원하지 않습니다. 기본 제한시간은 15초이며 오류 시 로그인·연결 상태를 확인한 뒤 재조회합니다. 자동 로그인이나 reset credit 사용은 수행하지 않습니다.
+
+조회값은 장부·DB에 저장하지 않습니다. 누락값은 `미제공`으로 표시하고, 지난 초기화 시각은 재조회가 필요하다고 표시합니다. 남은 비율을 토큰·메시지 개수로 환산하지 않습니다.
+
+### 설치와 프로젝트 토큰 수집
+
 일반 설치:
 
 ```powershell
@@ -95,7 +110,9 @@ codex-usage sync
 python -m unittest discover -s tests -t . -v
 ```
 
-현재 자동 테스트 159개 중 158개를 통과했고 1개는 자동 테스트 호스트의 Windows 로그온 세션 부재로 skip됐습니다. 일반 Windows 사용자 PowerShell에서는 Credential Manager 왕복 테스트가 별도로 통과했습니다. 로컬 bare remote 기반 수용 테스트에서는 두 기기의 수집·동기화·수동 연결·보고와 새 clone의 DB 재생성을 확인했습니다. 실제 비공개 GitHub에서는 합성 이벤트의 push·clean clone 재생성·doctor 검사와 임시 브랜치 삭제가 통과했습니다. wheel을 소스 checkout 밖의 새 가상환경에 설치해 version·schema·CLI entrypoint를 검증했습니다. 실제 로컬 익명 검증에서는 사용량 이벤트 56,208개를 70개 프로젝트·날짜 행으로 집계하고 터미널·Markdown 보고서를 0.628초에 생성했습니다.
+2026-09-16 Windows에서 status 테스트 15개를 포함한 전체 174개 테스트가 모두 통과했습니다. 실제 codex-cli 0.154.0 연결에서도 한도 조회를 확인했습니다.
+
+기존 v1 검증에서는 로컬 bare remote 기반 두 기기의 수집·동기화·수동 연결·보고와 새 clone의 DB 재생성을 확인했습니다. 실제 비공개 GitHub에서는 합성 이벤트의 push·clean clone 재생성·doctor 검사와 임시 브랜치 삭제가 통과했습니다. wheel을 소스 checkout 밖의 새 가상환경에 설치해 version·schema·CLI entrypoint를 검증했습니다. 실제 로컬 익명 검증에서는 사용량 이벤트 56,208개를 70개 프로젝트·날짜 행으로 집계하고 터미널·Markdown 보고서를 0.628초에 생성했습니다.
 
 ## 문서
 

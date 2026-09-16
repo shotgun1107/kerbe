@@ -5,9 +5,9 @@
 - v1 핵심 Build·Validate: 2026-09-01 완료 기록이 있다.
 - 0.1.0 정식 출시: 확인되지 않았다. `CHANGELOG.md`의 release candidate 표기를 유지한다. 2026-09-16 로컬 Git 조회에서는 태그가 없었으며 원격 출시 여부는 조회하지 않았다.
 - 최초 실사용 설정: 실제 두 기기의 복구 키 import와 같은 `key_id` 확인은 별도 체크리스트 항목이다.
-- quota·reset 및 UI: 후속 검토 범위이며 세부 사양·구현 시작 승인은 없다.
+- quota·reset: 2026-09-16 수동 `status` 조회 추가(D-051·D-052). 영속 수집과 UI는 후속 검토 범위다.
 
-아래 명령과 체크리스트는 검증 절차다. 2026-09-16 문서 상태 정리에서는 테스트·설치·원격 smoke를 재실행하지 않았다.
+아래 명령과 체크리스트는 검증 절차다. 앞선 문서 상태 정리에서는 테스트·설치·원격 smoke를 재실행하지 않았다. 이후 status 구현 검증은 아래 별도 기록으로 구분한다.
 
 ## 자동 검증
 
@@ -69,7 +69,17 @@ python scripts\private_github_smoke.py --remote https://github.com/<owner>/<priv
 
 ## 0.1.0 검증 결과
 
+아래는 2026-09-01 핵심 v1 검증 기록이다.
+
 - Windows 사용자 세션 Credential Manager 테스트: 통과
 - 비공개 GitHub 합성 장부 smoke: 통과, 합계 123, 임시 브랜치 삭제 확인
 - 로컬 전체 테스트: 159개 중 158개 통과, 자동 환경 Credential 테스트 1개 skip
 - GitHub Actions: Windows·Ubuntu 전체 테스트와 wheel 생성 통과
+
+## 후속 status 검증 (2026-09-16)
+
+- Windows Python 3.12.10: 전체 테스트 174개 모두 통과, skip 없음.
+- 신규 status 테스트 15개: 합성 App Server stdio·오류·시간 초과·종료 정리·다중 버킷·누락값·CLI 초기화 불필요 확인.
+- 실제 codex-cli 0.154.0: 계정 한도 읽기 성공, 일반·별도 모델 버킷과 KST 초기화 시각 표시 확인.
+- wheel 빌드·프로젝트 전용 `.venv` 설치 완료. 소스 checkout 밖에서 설치된 `codex-usage status`와 JSON Schema 로딩 성공.
+- 이번 후속 변경의 원격 CI·정식 출시는 아직 수행하지 않았다.

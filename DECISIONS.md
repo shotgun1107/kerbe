@@ -56,6 +56,15 @@
 | D-049 | doctor는 원격 변경 없이 JSONL/SQLite join, 관측 버전, parser issue, run history, outbox, 미분류, read model 일치와 Git 원격 읽기 권한을 검사한다. 출력은 개수·시각·고정 오류 코드로 제한한다. | 실제 운영 문제를 진단하면서 로컬 경로·remote·원본 ID 노출을 막는다. |
 | D-050 | 배포 version은 `codex_usage.__version__`을 단일 원천으로 사용하고 Windows·Linux CI에서 전체 테스트와 wheel 빌드를 수행한다. release 전에 소스 checkout 밖의 격리 설치를 검증한다. | 소스 실행과 실제 설치물의 차이 및 version 불일치를 조기에 발견한다. |
 
+## 2026-09-16 후속 기능 결정
+
+| ID | 상태 | 결정 | 이유 |
+|---|---|---|---|
+| D-051 | 확정 | 사용자 구현 요청에 따라 `codex-usage status`로 현재 계정의 남은 한도 비율과 초기화 시각을 조회한다. Codex App Server의 `account/rateLimits/read`만 호출하며 다중 버킷을 우선하고 버킷별 primary·secondary를 분리 표시한다. | 핵심 v1 검증 이후 남은 구독 한도 확인 요구를 충족한다. |
+| D-052 | 확정 | status는 기존 Codex 로그인으로 수동 조회하고 장부·DB에 저장하지 않는다. init·공유 HMAC 키 없이 실행한다. 누락값은 미제공으로, 실패는 오류로 표시한다. 자동 갱신·UI·reset 소비·프로젝트별 한도 배분·공유 장부 저장은 이번 범위에서 제외한다. | 현재값 조회에는 다기기 계정 식별이나 장부 스키마 변경이 필요하지 않다. |
+
+D-047의 핵심 완료 후 추가 조건에 따라 조회 기능을 구현한다. D-019의 토큰 역산 금지와 D-013의 UI 보류는 유지한다. quota snapshot의 영속 수집은 후속 검토로 남긴다.
+
 ## 제안된 결정
 
 현재 제안 상태로 남은 결정은 없다.

@@ -348,9 +348,10 @@ tests/
 9. ✅ project list·manual link·alias CLI
 10. ✅ doctor 보강·다기기 end-to-end 수용 검증
 11. ✅ wheel·Credential Manager·비공개 GitHub smoke·Windows/Linux CI
-12. ⏸️ 핵심 프로그램 완성 후 quota 보조 수집
+12. ✅ 핵심 프로그램 완성 후 `status` 계정 한도·reset 수동 조회
+13. ⏸️ quota 영속 수집·다기기 공유·UI
 
-핵심 프로그램의 v1 검증은 완료했다. 한도와 초기화 시각은 별도 작업 단위로 추가한다.
+핵심 프로그램의 v1 검증은 완료했다. 후속 `status`는 `CLI → sources/quota.py → Codex App Server stdio → reports/quota.py` 경로로 실행한다. initialize·initialized 이후 account/rateLimits/read를 한 번 요청하고 프로세스를 종료한다. 전체 조회 제한시간과 종료 시 강제 정리를 적용한다. DB·장부·Credential Manager adapter는 사용하지 않으며, stderr와 계정 오류 원문을 사용자 출력에 전달하지 않는다. 기존 quota 장부 구조는 이번 조회에 사용하지 않는다.
 
 ## ADR 목록
 

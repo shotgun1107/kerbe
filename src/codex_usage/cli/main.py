@@ -51,9 +51,12 @@ from codex_usage.secret_store import (
 )
 from codex_usage.storage.sqlite import LocalStateStore, LocalStoreError
 from codex_usage.sync.git import GitSyncError
+from codex_usage.sources.quota import QuotaError, read_rate_limits
+from codex_usage.reports.quota import quota_timezone, render_quota
 
 
 _EXPECTED_ERRORS = (
+    QuotaError,
     CollectError,
     ApplicationLockError,
     ConfigError,
@@ -84,6 +87,13 @@ def main(
     arguments = parser.parse_args(argv)
 
     try:
+        if arguments.command == "status":
+            quota_timezone(arguments.timezone)
+            response = read_rate_limits(
+                executable=arguments.codex_path, timeout=arguments.timeout,
+            )
+            print(render_quota(response, timezone_name=arguments.timezone), end="", file=output)
+            return 0
         config_path = Path(arguments.config).expanduser().resolve()
         if arguments.command == "init":
             secrets = secret_store or default_secret_store()
@@ -152,6 +162,10 @@ def _build_parser() -> argparse.ArgumentParser:
     commands.add_parser("collect", help="collect and flush Codex token usage")
     commands.add_parser("sync", help="synchronize the private Git ledger")
     commands.add_parser("doctor", help="run read-only environment diagnostics")
+    status = commands.add_parser("status", help="show remaining account quota and reset times")
+    status.add_argument("--codex-path", default="codex", help="native Codex executable path")
+    status.add_argument("--timeout", type=float, default=15, help="query timeout in seconds (max 120)")
+    status.add_argument("--timezone", default="Asia/Seoul", help="display timezone (default Asia/Seoul)")
     project = commands.add_parser("project", help="inspect and map projects")
     project_commands = project.add_subparsers(
         dest="project_command",

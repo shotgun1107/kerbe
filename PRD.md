@@ -232,7 +232,10 @@ codex-usage doctor
 
 ### FR-013. 한도 보조 정보 — v1 핵심 완성 이후
 
-- Codex가 직접 제공한 사용률·reset 시각만 quota snapshot으로 저장한다.
+- 현재 구현 범위(D-051·D-052): `status`로 Codex가 직접 제공한 계정 한도를 읽어 남은 비율·기간·reset 시각·조회 시각을 표시한다. 기본 시간대는 Asia/Seoul이다.
+- App Server 다중 버킷 응답을 우선하고 primary·secondary를 분리한다. 누락값을 0이나 100%로 간주하지 않으며, 초기화 시각이 지나도 잔량을 임의 복원하지 않는다.
+- Codex 기존 로그인을 사용하며 init·장부·공유키 없이 조회한다. 오류·시간 초과는 종료 코드 2와 고정 안내로 표시한다.
+- quota snapshot 영속 저장은 후속 범위다. 현재 status는 장부·DB에 저장하지 않는다.
 - 토큰 합계에서 한도 소모율을 계산하지 않는다.
 - quota 수집 실패는 core usage 수집을 실패시키지 않는다.
 
