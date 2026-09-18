@@ -15,6 +15,8 @@ JSONL은 token checkpoint·모델·turn·Git 이력을 제공하지만 직접 sp
 - `threads.id = rollout UUID = 첫 session_meta.id`로 조인한다.
 - 두 원천은 항상 read-only로 연다.
 - Codex 내부 스키마는 versioned adapter 뒤에 격리한다.
+
+구현 대조(2026-09-18): 이 항목은 설계 의도다. 현재 JSONL parser는 버전별 dispatch가 아닌 구조 기반 단일 parser이며, doctor도 지원 버전 목록을 판정하지 않는다. 요구 변경 여부를 확정하지 않고 [1단계 대조 A-02](../../STATE_AUDIT_2026-09-18.md)에 차이로 기록했다.
 - SQLite 사용 불가 시 JSONL-only로 수집하되 lineage 불완전 경고를 남긴다.
 
 ## 대안

@@ -4,9 +4,13 @@
 
 스키마 버전: `1`
 
+2026-09-18 후속 진행 방향은 [ROADMAP.md](ROADMAP.md), D-059를 따른다. 이번 결정에는 스키마 변경이 포함되지 않는다. alias 해제·새 사용량 수집 등 기능 후보가 데이터 구조 변경을 요구하면 별도 사양으로 결정한다.
+
 기계 검증 파일: [`schemas/ledger-event-v1.schema.json`](schemas/ledger-event-v1.schema.json)
 
 ## 목적
+
+구현 범위 주의(2026-09-18): 이 문서는 장부가 표현·검증할 수 있는 데이터 형식이다. 모든 이벤트를 생성하는 CLI가 있다는 뜻은 아니다. 현재 quota snapshot 수집, project/device 수동 이름 설정, unlink/unalias, 자동 usage 정정 revision 생성 CLI는 없다. mapping 재지정은 revision을 생성하지만 collect의 새 usage는 revision=1이다. 또한 새 기기에서 장부만으로 사용량 DB를 재생성해도 로컬 전용 저장소 이름 대응표까지 전송·복원되지는 않는다. [1단계 대조 A-04·A-09](STATE_AUDIT_2026-09-18.md) 참조.
 
 Codex 원본 JSONL과 SQLite에서 대화 내용을 제거한 사용량 이벤트를 만들고, 여러 기기가 비공개 Git 장부에서 충돌 없이 공유할 수 있도록 정의한다.
 

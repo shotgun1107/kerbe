@@ -6,6 +6,8 @@
 
 ## 설계 목표
 
+후속 진행은 D-059의 [ROADMAP.md](ROADMAP.md)를 따른다. Python 유지·구조 개선·언어 전환은 3단계 조사 후 판단하며 현재 아키텍처 변경은 승인되지 않았다. 본문은 기존 승인 설계를 보존한다.
+
 - Codex 원본을 수정하지 않는 local-first 도구
 - 여러 기기와 fork·오케스트레이션에서도 결정적인 집계
 - Git 장부에 민감한 원문이 들어가지 않는 구조
@@ -116,7 +118,7 @@ sequenceDiagram
     C->>C: single-instance lock
     C->>S: inventory JSONL + SQLite
     S-->>C: threads · edges · source cursors
-    C->>S: read complete new lines
+    C->>S: changed files: read all complete lines
     S-->>D: checkpoint · turn · Git evidence
     D->>D: lineage · delta · project resolution
     D-->>P: logical usage event
@@ -135,7 +137,7 @@ sequenceDiagram
 - source cursor와 outbox event를 같은 로컬 SQLite transaction에 기록한다.
 - 장부 append 전 종료되면 outbox가 다음 실행에서 다시 flush한다.
 - 장부 append 후 상태 갱신 전 종료되면 `event_id` 검색으로 중복 append를 막는다.
-- JSONL 마지막 partial line은 읽지 않고 다음 실행까지 기다린다.
+- Codex 원본 JSONL의 마지막 미완성 줄은 읽지 않으며 원본을 수정하지 않는다. Kerbe 장부 reader는 partial tail을 무시하고 issue를 보고하며, writer는 자기 대상 파일의 partial tail을 잘라낸 뒤 pending 이벤트를 반영할 수 있다. sync/link/alias는 장부 partial issue가 있으면 중단한다.
 - 한 기기에서는 collect와 sync를 동시에 실행하지 않도록 lock을 사용한다.
 
 ## sync 데이터 흐름
@@ -181,14 +183,16 @@ ledger JSONL
 → schema validation
 → latest revision 선택
 → voided 제외
-→ project alias 해소
-→ manual assignment 적용
+→ turn manual → thread manual → 원래 project 순으로 귀속 선택
+→ 선택된 project의 alias 해소
 → SQLite read model
 → filter · group · cumulative
 → terminal table 또는 Markdown
 ```
 
-보고서는 원천 checkpoint를 다시 계산하지 않고 effective usage event의 delta를 합산한다. parser version이 바뀌어 정정 이벤트가 추가되면 replay만으로 결과가 갱신된다.
+위 흐름의 장부 검증·replay·SQLite 생성은 collect/sync/link/alias 등에서 수행한다. report 명령 자체는 이미 생성된 SQLite부터 읽어 집계하며 장부를 replay하지 않는다.
+
+보고서는 원천 checkpoint를 다시 계산하지 않고 effective usage event의 delta를 합산한다. 유효한 정정 이벤트가 추가되면 replay로 결과가 갱신된다. 다만 현재 collect는 parser version 변경만으로 기존 usage의 정정 revision을 자동 생성하지 않는다(A-04).
 
 ## 프로젝트 귀속 처리
 

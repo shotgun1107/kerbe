@@ -4,6 +4,8 @@
 
 대상 버전: v1
 
+후속 절차(2026-09-18): D-059와 [ROADMAP.md](ROADMAP.md)를 따른다. [1단계 정적 대조](STATE_AUDIT_2026-09-18.md)는 완료했으며 미구현 요구는 아래 주석으로 구분한다. UX 후보는 규칙 정의와 기술 조사 후 적용한다. 이 진행 방향 승인으로 기능 요구사항이나 신규 기능 사양이 변경된 것은 아니다.
+
 작성일: 2026-08-26
 
 ## 제품 정의
@@ -108,6 +110,8 @@ kerbe project link --thread <local-thread-id> --project <project-id>
 
 ### FR-001. 기기 초기화
 
+구현 대조(2026-09-18, A-01): 아래 요구 중 초기화 시 기본 시간대 저장과 기존 장부 key ID 확인은 현재 미구현이다. 시간대는 report/status 옵션의 기본값이며 init은 기존 장부 키를 검사하지 않는다. 요구 변경·구현 여부는 [1단계 검토](STATE_AUDIT_2026-09-18.md)에서 미결정으로 관리한다.
+
 - 각 기기에 영구 device UUID를 한 번 생성한다.
 - 비공개 장부 경로와 기본 표시 시간대를 설정한다.
 - 기존 공유 HMAC 키 입력 또는 새 키 생성을 지원한다.
@@ -116,12 +120,16 @@ kerbe project link --thread <local-thread-id> --project <project-id>
 
 ### FR-002. 원천 데이터 탐색
 
+구현 대조(A-02): 현재 parser는 cli_version으로 adapter를 선택하지 않고 레코드 구조로 해석한다. 버전은 metadata로 보존한다. 아래 버전별 adapter는 설계 요구와 구현의 차이로 남긴다.
+
 - 활성·보관 JSONL rollout을 모두 탐색한다.
 - SQLite thread 인덱스와 spawn-edge를 읽는다.
 - 원천 파일을 수정하거나 SQLite에 쓰지 않는다.
 - `cli_version`별 파서 어댑터와 unknown 레코드 무시 기능을 둔다.
 
 ### FR-003. 증분 수집
+
+구현 대조(A-03): 현재 파일 cursor는 경로 해시 기준이며 이동 시 새 cursor로 처리한다. usage 중복은 별도 source event ID로 제거한다. 잘림·재작성은 변경으로 감지하지만 전용 경고는 없다. 아래 요구와 동일한 구현으로 간주하지 않는다.
 
 - rollout별 마지막 안전 커서를 로컬 상태 DB에 저장한다.
 - 진행 중인 append 파일을 다시 읽어도 기존 이벤트를 중복 생성하지 않는다.
@@ -135,6 +143,7 @@ kerbe project link --thread <local-thread-id> --project <project-id>
 - 신규 일반 thread의 첫 체크포인트는 첫 사용량으로 처리한다.
 - resume는 같은 누적 카운터를 이어서 계산한다.
 - fork가 복사한 turn은 전역 멱등 키로 중복 제거한다.
+- D-056 예외: 구형 `rollout-N` turn ID는 thread 범위로 구분한다. D-057의 상속 기준값·기준값 미확인 fork 기록은 null delta로 보존하고 합계에서 제외한다.
 - compact의 불투명한 reported last는 별도 보존하고 일반 합계에서는 제외한다.
 - 캐시·추론 토큰을 total에 다시 더하지 않는다.
 
@@ -180,11 +189,12 @@ kerbe project link --thread <local-thread-id> --project <project-id>
 - 기기 하나는 자기 device 디렉터리에만 쓴다.
 - usage·mapping·quota 이벤트를 JSONL로 append한다.
 - parser 정정은 revision과 `supersedes` 이벤트로 표현한다.
+- 구현 범위(A-04): schema/replay는 usage 정정을 처리하지만 현재 collect는 신규 usage revision=1을 생성하고 알려진 source event를 건너뛴다. parser 변경 후 자동 정정 revision을 생성하는 기능은 없다. 수동 연결 mapping의 revision 생성과 구분한다.
 - v1에서는 장부 이벤트를 삭제하거나 롤업하지 않는다.
 
 ### FR-009. Git 동기화
 
-- `collect`는 자기 기기 장부만 추가하고, 이어지는 `sync`가 전체 장부를 가져와 검증·통합한 뒤 자기 기기 파일만 커밋·푸시한다.
+- `collect`는 자기 기기 장부만 추가한다. `sync`는 로컬 장부·변경 경계를 검증하고 자기 기기 파일을 커밋한 뒤 fetch·rebase, 통합 장부 검증·조회 DB 재생성, 필요한 push를 수행한다(D-046).
 - 다른 기기 파일과 충돌 없이 병합할 수 있어야 한다.
 - push 실패 시 로컬 이벤트를 잃지 않고 다음 sync에서 재시도한다.
 - 데이터 장부 저장소와 공개 소스코드 저장소는 분리한다.
@@ -218,6 +228,8 @@ kerbe doctor
 - 지표: 기간 합계, 날짜별 사용량, 누적 사용량, 토큰 세부 항목
 
 ### FR-012. 진단
+
+구현 대조(A-02·A-11): 아래 지원·미지원 버전 판정은 현재 관측 버전·메타데이터 파싱 상태 표시에 그친다. read-model 검사는 key_id·입력 이벤트 수·유효 usage 수 비교이며 모든 토큰 필드의 일치 검사가 아니다. 실제 판정은 CLI_REFERENCE를 따른다.
 
 `doctor`는 다음을 확인한다.
 
