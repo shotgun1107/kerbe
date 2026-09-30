@@ -1,5 +1,9 @@
 # 자료조사 및 검증 기록
 
+## CLI 철학 조사 후속 정리 — 2026-09-30
+
+Pro 조사, Claude의 독립 검토, GPT의 과거 기록 대조, 사용자 확정 및 충돌 보충을 [CLI_DESIGN_REVIEW](CLI_DESIGN_REVIEW.md)에 종합했다. 외부 원전 15개 중 13개의 관련 본문을 2026-09-29 확인했고 Codd·git-revert는 조회 실패, DuckDB/SQLite integrity_check는 추가 검증 대기다. 사용자 확정의 근거와 외부 사실을 구분한다. 정책 정본은 [CLI_PHILOSOPHY](CLI_PHILOSOPHY.md)이며 이번 정리에서 제품·원본 로그·계정 API·성능을 재검증하지 않았다.
+
 상태: v1 핵심 검증 기록 보존 · 후속 조사 미확정
 
 2026-09-18 후속 순서는 [ROADMAP.md](ROADMAP.md), D-059로 확정했다. 개별 조사 결론은 여전히 미확정이다. CLI 관례·상용 데이터 도구 정책 조사는 2단계, 성능·언어 전환 판단은 3단계이며 1단계 이후 병행할 수 있다. 공식 Codex 세션별 사용량 API 조사는 사용자 요청으로 보류한다.
