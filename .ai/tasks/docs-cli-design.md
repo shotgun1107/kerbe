@@ -1,6 +1,6 @@
 # CLI 설계 작업 상태
 
-갱신: 2026-10-02 · 집 PC 인계 준비
+갱신: 2026-10-02 · 집 PC 인계
 
 ## 목표와 완료 조건
 
@@ -8,7 +8,7 @@
 
 ## 현재 상태와 실제 변경
 
-- 작업 브랜치: docs/identifier-key-policy. 시작 HEAD/main은 `026a8a0e4cd6a0a7782f90f0848e641b33759a3e`. 이 인계는 A안 후속 문서 전송이다. main에 병합했다고 가정하지 않는다.
+- 작업 브랜치: docs/identifier-key-policy. 시작 HEAD/main은 `026a8a0e4cd6a0a7782f90f0848e641b33759a3e`. A안 본문 9d90250은 같은 이름의 원격 브랜치에 전송·일치 확인했다. main에 병합했다고 가정하지 않는다.
 - D-069: 식별용 HMAC 키는 비공개 장부 내부, 제목 키는 별도 외부 보관. 기존 키 정책과 공통 규약의 한정 예외를 명시했다. 실제 키·장부·코드는 변경하지 않았다.
 - 정본: [명령 설계](../../CLI_COMMAND_DESIGN.md), [철학](../../CLI_PHILOSOPHY.md), [결정](../../DECISIONS.md). 현재 실행 동작은 [CLI_REFERENCE](../../CLI_REFERENCE.md), 개발 규약은 [CONTRIBUTING](../../CONTRIBUTING.md).
 - 이전 규약 정리와 Windows 테스트 수정은 PR #1로 main에 병합됐고 당시 작업 브랜치는 삭제됐다. 과거 커밋은 보존했다.
@@ -16,7 +16,7 @@
 ## 실행한 검사와 결과
 
 - 이번 인계: 원격 main을 fetch해 위 SHA로 고정, 시작 HEAD와 같음 확인. 진행 중 Git 작업·stash·보조 worktree 없음. 변경은 문서만이며 제품 경로는 변경하지 않았다.
-- 앞선 A안 문서 검사: 링크·UTF-8·공통 규약 원문 보존·diff 검사 통과. 이번 최종 전송 파일도 재검사한다.
+- 앞선 A안 문서 검사: 링크·UTF-8·공통 규약 원문 보존·diff 검사 통과. 이번 전송 파일의 링크·UTF-8·diff·index blob 일치 검사를 완료했다.
 - 과거 검증: 식별자/encoder/replay 24개 통과, 합성 키 차이 4종 확인. 전체 테스트는 Windows 경로 수정 후 182개 중 181 통과·Credential Manager 1 skip. main 026a8a0의 원격 Windows·Ubuntu CI도 성공했다. 이번 문서 인계에서 제품 테스트·빌드는 재실행하지 않는다.
 
 ## 미해결 문제와 남은 위험

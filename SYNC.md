@@ -1,12 +1,27 @@
 # Kerbe 동기화 인수인계
 
-## 최신 전달 기록 — 2026-10-02
+## 최신 전달 기록 — 2026-10-02 집 PC 인계
 
-- 문서·규약·명령 설계 정리 본문 커밋: `6669dae0acac003867f6f63aaee78b4bf6657849`. 원격 작업 브랜치와 SHA 일치 확인. CI 경로 테스트 수정은 `de30ea771820a3c747a801f8a194c06fa767029e`에 분리했다.
-- [PR #1](https://github.com/shotgun1107/kerbe/pull/1)의 [CI](https://github.com/shotgun1107/kerbe/actions/runs/36980742689)에서 Windows·Ubuntu 테스트와 wheel 빌드 성공을 확인했다. 로컬 전체 검사는 182개 중 181 통과·Credential Manager 1 skip이다. 8.3 경로 실패 재현과 수정 후 성공도 확인했다.
-- 위 SHA는 작업 본문 전달 커밋이며 이 인계 메모의 후속 커밋 및 병합 커밋과 구분한다. 재개할 때 실제 main·HEAD·미커밋 상태를 확인한다.
-- 미전달: 기존 로컬 전용 인계 파일 2개, 개인 장부·DB·복구 키·인증정보·가상환경. 다른 PC의 환경·로그인·개인 장부 연결·설치본은 확인하지 않았다.
-- 공통 규약은 [CONTRIBUTING](CONTRIBUTING.md), 현재 CLI 설계 상태와 다음 행동은 [.ai/tasks/docs-cli-design.md](.ai/tasks/docs-cli-design.md)를 따른다. 아래 9월20일 원본은 과거 기록이며 현재 재개 지시나 새 승인이 아니다.
+- 저장소: https://github.com/shotgun1107/kerbe
+- 받을 브랜치: `docs/identifier-key-policy` (main에 미병합).
+- 작업 본문 전달 커밋: `9d90250ca609a00e18903ab6e427d977da3458de`. 해당 원격 브랜치의 실제 SHA와 일치를 확인했다. 이 노트·작업 상태를 갱신하는 후속 인계 커밋은 별도다.
+- 시작 시 원격 main 고정 SHA: `026a8a0e4cd6a0a7782f90f0848e641b33759a3e`. 로컬 HEAD와 같아서 받을 추가 변경은 없었다. 충돌·이력 재작성 없음.
+- 전달 내용: D-069 A안(식별용 HMAC 키는 비공개 장부 안, 선택적 제목 키는 장부 밖), 관련 명세·정책 예외, report 설계의 다음 논의 지점. 실제 키·장부·제품 코드는 변경하지 않았다.
+- 이번 검증: 전송 파일 내용·허용 목록·로컬 링크·UTF-8·diff·index blob/작업 파일 일치·원격 SHA 확인. 문서 변경만 있어 제품 테스트·wheel 빌드는 재실행하지 않았다. 이 브랜치의 새 원격 CI 검증은 수행하지 않았다.
+- 이전 main 026a8a0의 Windows·Ubuntu CI와 wheel은 성공했다. 이는 A안 구현 검증이 아니다.
+- 미전달: 기존 로컬 인계 파일 `019fabea-0584-76d2-acac-4598cb5fde1f-quota-ui-review-handoff.md`, `NEXT_SESSION_REVIEW_PROMPT.md`, 개인 장부·SQLite·복구 키·로그인·가상환경. 집 PC에서 생긴 미전송 작업은 확인하지 못했다.
+
+### 집에서 재개
+
+1. [AGENTS](AGENTS.md) → [CONTRIBUTING](CONTRIBUTING.md)을 읽고 집 PC의 실제 변경·브랜치·HEAD를 먼저 확인한다. 위 원격 작업 브랜치를 확인해 받는다. main만 갱신하면 이번 A안 문서는 포함되지 않는다.
+2. [.ai/tasks/docs-cli-design.md](.ai/tasks/docs-cli-design.md)와 [명령 설계](CLI_COMMAND_DESIGN.md)를 읽는다. 다음은 report의 기본 화면(기본 행·열·정렬)이다. 확정된 오늘/현지 시간대/자동 수집·동기화를 다시 결정하지 않는다.
+3. 문서 설계는 바로 이어갈 수 있다. 실행 검증이 필요해지면 집 PC의 Python·가상환경·설치본을 별도 확인한다. 설치·로그인·키 이전은 이 인계로 자동 실행하지 않는다.
+
+### 환경 구분
+
+- 프로젝트 요구: pyproject.toml의 Python >=3.12, tzdata>=2024.1. 설치 안내는 README와 scripts/install_cli.ps1. 새로운 환경 계약이나 .sync.yml은 만들지 않았다.
+- 보내는 환경에서 확인: 기존 .venv의 Python 3.12.10. 이번 인계에서 설치·환경 설정 변경 없음.
+- 받는 환경: 집 PC Python·의존성·CLI 등록·Codex 로그인·개인 장부 연결은 모두 미확인이다. .venv나 인증정보를 Git으로 전송하지 않는다.
 
 ## 과거 인수인계 원본 — 2026-09-20
 
