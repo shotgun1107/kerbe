@@ -32,9 +32,11 @@ Codex 대화·코드·명령·로컬 경로·raw remote는 중앙 장부에 저�
 
 ## 현재 CLI 사용법
 
+아래는 **현재 구현의 사용법**입니다. 후속 설계에서는 init을 로컬 시작, sync를 일회성 장부 합류 설정으로 바꾸고 collect를 사용자 명령에서 제외하기로 했지만 아직 구현하지 않았습니다. 현재는 아래 수동 수집·동기화 절차와 공유 HMAC 키가 필요합니다. [확정 명령 설계](CLI_COMMAND_DESIGN.md)를 현재 사용법으로 실행하지 마세요.
+
 현재 후속 작업은 [확정 진행 방향](ROADMAP.md)을 따릅니다. [1단계 정적 대조 결과](STATE_AUDIT_2026-09-18.md)에 현재 구현·문서 불일치·검증 공백을 정리했습니다. 2026-09-30 CLI 철학 1~7은 확정했고 다음은 명령 체계·출력 설계입니다. 유지보수 조사는 미착수이며, 승인된 목표를 현재 기능으로 안내하지 않습니다. [미결정 목록](OPEN_QUESTIONS.md)과 [논의 기록](CLI_DESIGN_REVIEW.md)을 함께 관리합니다.
 
-명령 동작에 답할 때는 [AI 조회용 CLI 동작 계약](CLI_REFERENCE.md)의 질문 색인과 해당 명령의 계약을 먼저 확인합니다. 모든 명령의 입력·사전 조건·변경·보존·반복·실패 동작, 상황별 결과, 코드 확인/기존 테스트 근거를 구분해 기록합니다. 개선 제안은 현재 동작과 별도로 관리합니다.
+명령별 입력·출력·실패 동작은 [CLI 동작 참조](CLI_REFERENCE.md), 개발 참여와 검증 방법은 [CONTRIBUTING](CONTRIBUTING.md)에서 확인할 수 있습니다.
 
 ### Windows 명령어 등록
 
@@ -147,7 +149,11 @@ python -m unittest discover -s tests -t . -v
 
 ## 문서
 
-- [1차 마무리·대화 복기·후속 TODO](PHASE1_REVIEW_TODO.md)
+- [개발·Git·검증 규약](CONTRIBUTING.md)
+- [확정 CLI 철학](CLI_PHILOSOPHY.md)
+- [명령 설계와 현재 구현의 차이](CLI_COMMAND_DESIGN.md)
+- [진행 방향](ROADMAP.md) · [미해결 사항](OPEN_QUESTIONS.md)
+- [초기 실사용 검토 기록](PHASE1_REVIEW_TODO.md)
 
 - [프로젝트 브리프](PROJECT.md)
 - [v1 PRD](PRD.md)

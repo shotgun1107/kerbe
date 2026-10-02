@@ -1,5 +1,17 @@
 # v1 release smoke checklist
 
+## 2026-10-02 Windows 경로 비교 회귀 검증
+
+- 기존 원격 실패와 같은 8.3 짧은 임시 경로를 만들어 해당 테스트 실패를 로컬에서 재현했다. 제품은 config 경로를 resolve하므로 기대 경로도 같은 기준으로 정규화했다. 실제 장부 폴더 생성 검사와 동등성 검사는 유지했다. 제품 코드는 변경하지 않았다.
+- 수정 후 실제 8.3 경로 재현 통과. CI=true로 기존 전체 unittest 실행: 182개 중 181개 통과, 대화형 Credential Manager 검사 1개 skip. skip을 통과로 계산하지 않는다.
+- `pip wheel --no-deps --no-build-isolation`은 로컬 setuptools backend 부재로 실패. CI의 표준 `pip wheel --no-deps . --wheel-dir dist` 격리 빌드는 성공했다. 개발 환경에 setuptools를 직접 설치하지 않았다.
+- 수정 커밋: `de30ea771820a3c747a801f8a194c06fa767029e`. 후속 문서 커밋 `6669dae0acac003867f6f63aaee78b4bf6657849`의 [PR CI](https://github.com/shotgun1107/kerbe/actions/runs/36980742689)에서 Windows·Ubuntu 테스트·wheel 빌드 모두 성공했다. 아래 기존 원격 실패 기록은 이력으로 보존한다.
+
+## 2026-10-02 원격 상태 확인
+
+main `6e28a9609f695679f7c063e83090561b6f23dccb`의 [GitHub CI](https://github.com/shotgun1107/kerbe/actions/runs/36689568779)는 전체 성공이 아니다. Ubuntu 테스트·wheel은 성공했으나 Windows에서 `test_init_without_ledger_uses_config_directory`가 긴 경로와 8.3 짧은 경로 비교로 실패했다(182개 실행, failure 1, skip 1). Windows wheel은 건너뛰었다. 아래 날짜별 과거 검증은 수정하지 않는다. 현재 정식 GitHub Release 목록은 비어 있다.
+
+
 ## 수집 오류 수정·프로젝트 이름 표시 검증 (2026-09-16)
 
 - 전체 회귀 테스트 182개 통과.
