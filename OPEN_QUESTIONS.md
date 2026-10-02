@@ -4,7 +4,7 @@
 
 - 수집·동기화의 사용자 명령 역할은 D-067로 확정했다. collect 존치와 sync의 반복 전송 역할을 다시 미정으로 취급하지 않는다. help/version/초기화 오류 등의 자동 실행 경계는 상세 사양에서 정한다.
 - URL만으로 합류하려면 기존 HMAC 식별 의존성을 해결해야 한다. 현 프로젝트·세션·turn·이벤트 ID는 공유 키에 의존하고, key_id가 다른 장부는 합칠 수 없다. 식별자·encoder·replay 기존 테스트 24개와 합성 키 4종 차이 실험을 확인했다. 제목 암호화 키와 분리할 구체적 식별 모델·이전 방식은 미정이며 키를 저장소에 넣는 해결은 승인되지 않았다.
-- GitHub main `6e28a96`의 [CI 36689568779](https://github.com/shotgun1107/kerbe/actions/runs/36689568779): Ubuntu 성공, Windows는 `test_init_without_ledger_uses_config_directory`의 긴 경로/8.3 짧은 경로 비교에서 실패(182개 실행, failure 1, skip 1). 테스트 수정 de30ea7에서 실제 짧은 경로로 재현 후 로컬 회귀 검증했다. 새 원격 결과 확인은 남아 있으며 과거 로컬 합격은 현재 CI 성공이 아니다.
+- GitHub main `6e28a96`의 [CI 36689568779](https://github.com/shotgun1107/kerbe/actions/runs/36689568779): Ubuntu 성공, Windows는 `test_init_without_ledger_uses_config_directory`의 긴 경로/8.3 짧은 경로 비교에서 실패(182개 실행, failure 1, skip 1). 테스트 수정 de30ea7에서 실제 짧은 경로로 재현 후 로컬 회귀 검증했다. 후속 [PR CI](https://github.com/shotgun1107/kerbe/actions/runs/36980742689)에서 Windows·Ubuntu 모두 성공해 해당 실패는 해결됐다. 아래 제품의 중복·정정 제약이 해결됐다는 뜻은 아니다.
 
 
 ## 현재 미결정·검증 목록 — 2026-09-30
