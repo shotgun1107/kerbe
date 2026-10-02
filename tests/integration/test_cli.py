@@ -27,7 +27,9 @@ class CliIntegrationTests(unittest.TestCase):
                 stdout=StringIO(),
             )
             self.assertEqual(code, 0)
-            self.assertEqual(Path(load_config(config_path).ledger_root), config_path.parent / "ledger")
+            # The CLI resolves config paths, including Windows 8.3 aliases.
+            expected_ledger = config_path.parent.resolve() / "ledger"
+            self.assertEqual(Path(load_config(config_path).ledger_root), expected_ledger)
             self.assertTrue((config_path.parent / "ledger").is_dir())
 
     def test_init_collect_and_doctor_user_flow(self) -> None:
