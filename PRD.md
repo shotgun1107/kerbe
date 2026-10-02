@@ -1,5 +1,7 @@
 # Kerbe v1 PRD
 
+2026-10-02 후속 명령 요구(D-067): 수집·동기화 책임은 [CLI_COMMAND_DESIGN](CLI_COMMAND_DESIGN.md)의 확정 절을 따른다. URL 합류·장부 ID·키 없는 사용량 동기화·collect 제거는 목표 사양이며 기존 v1 명령 설명과 구분한다. 기존 공유 HMAC/장부의 이전 방법은 미결정이다.
+
 ## 2026-09-30 후속 요구사항 — 철학 승인·구현 미완료
 
 [CLI_PHILOSOPHY](CLI_PHILOSOPHY.md)의 1~7번과 최종 보충이 상위 제품 기준이다(D-060~066). 아래 기존 v1 본문은 당시 명세·수용 이력으로 보존한다. 충돌하는 정의를 현재 목표로 재채택하지 않는다. 현재 동작은 [CLI_REFERENCE](CLI_REFERENCE.md), 미결정 사양은 [OPEN_QUESTIONS](OPEN_QUESTIONS.md)의 N 항목을 따른다.
