@@ -167,6 +167,7 @@ Git 전달 완료와 다른 PC의 실행환경 준비 완료도 구분한다.
 | 진행 단계·방법론·결정 이력 | [ROADMAP](ROADMAP.md), [PROCESS](PROCESS.md), [DECISIONS](DECISIONS.md) |
 | 실제 명령·설계·데이터 구조 | [CLI_REFERENCE](CLI_REFERENCE.md), [CLI_COMMAND_DESIGN](CLI_COMMAND_DESIGN.md), [ARCHITECTURE](ARCHITECTURE.md), [SCHEMA](SCHEMA.md), docs/adr/ |
 | 설계 근거·검증·미확인 | [CLI_DESIGN_REVIEW](CLI_DESIGN_REVIEW.md), [RESEARCH](RESEARCH.md), [STATE_AUDIT](STATE_AUDIT_2026-09-18.md), [RELEASE](RELEASE.md), [OPEN_QUESTIONS](OPEN_QUESTIONS.md) |
+| AI 진입점·K12 Paseo 운영 규칙의 Kerbe 적용 | [AGENTS](AGENTS.md). Claude용 [CLAUDE](CLAUDE.md)는 AGENTS를 import만 함 |
 | 진행 중 CLI 설계의 AI 작업 상태 | [.ai/tasks/docs-cli-design.md](.ai/tasks/docs-cli-design.md) |
 | 기기 간 전달 기록 | [SYNC](SYNC.md). 작업 상태의 중복 정본으로 사용하지 않음 |
 
