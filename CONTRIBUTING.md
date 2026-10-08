@@ -191,6 +191,24 @@ python -m unittest discover -s tests -t .
 python -m pip wheel --no-deps . --wheel-dir dist
 ```
 
+#### Python 환경 격리
+
+개발 중 테스트는 worktree마다 루트에 만든 독립 `.venv`(`.gitignore` 대상)에 editable로 설치한 환경에서만 실행한다. 아래 명령은 worktree 루트(`git rev-parse --show-toplevel`)에서 실행한다. Windows는 `.venv/bin/python`을 `.venv\Scripts\python.exe`로 바꾼다.
+
+```text
+python -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/python -c "import sys, pathlib, codex_usage; root = pathlib.Path.cwd().resolve(); src = pathlib.Path(codex_usage.__file__).resolve(); assert pathlib.Path(sys.prefix).resolve() == root / '.venv', sys.prefix; assert src.is_relative_to(root / 'src'), src; print(sys.version.split()[0], src)"
+.venv/bin/python -m unittest discover -s tests -t .
+```
+
+- 세 번째 import 확인은 실행 중인 Python이 현재 worktree의 `.venv`인지, `codex_usage`가 현재 worktree의 `src/`에서 import되는지 검사한다. 실패하면 테스트를 실행하지 않는다. 출력한 Python 버전과 경로를 검증 결과에 기록한다. `.venv`는 3.12 이상의 Python으로 만든다(`requires-python`). CI 기준은 3.12이므로 다른 버전의 local 통과를 CI 조건의 통과로 기록하지 않는다.
+- 시스템·사용자 Python, 다른 worktree·원본 checkout의 `.venv`, PATH의 `kerbe`(설치 스크립트가 원본 checkout의 `.venv`를 등록할 수 있다)로 검사하지 않는다. `.venv`를 다른 worktree와 공유하거나 복사하지 않는다. `PYTHONPATH`가 설정돼 있으면 비우고 실행한다.
+- worktree 경로·Python 버전·`pyproject.toml`이 바뀌면 `.venv`를 다시 만들거나 재설치하고 import 확인부터 반복한다.
+- `.venv` 생성·설치가 실패하면(예: `ensurepip` 없음) 공유 환경·다른 설치본·sudo로 대체하지 않는다. 실패 원인을 기록하고 테스트를 미실행으로 남긴 뒤 사람에게 환경 준비를 요청한다.
+- 설치 없이 `PYTHONPATH=src`로 실행한 테스트는 보조 확인이며 위 절차의 통과로 기록하지 않는다.
+- 일반 설치 검증(`python -m pip install .`)은 CI와 같은 비editable 설치 확인이다. 개발용 `.venv`에 덮어 설치하지 않는다. 별도 임시 venv에서 실행하거나 CI 결과로 확인하고 개발 중 테스트와 구분해 기록한다. wheel 확인은 `.venv/bin/python -m pip wheel --no-deps . --wheel-dir dist`로 한다.
+
 별도 린트·형 검사 실행기는 현재 CI에 정의되어 있지 않다. 문서만 수정하고 제품 경로를 유지하는 작업은 diff·링크·원문 보존·제품 파일 무변경 검사를 사용하며 테스트/빌드를 실행하지 않았다면 명시한다. 제품을 수정하면 해당 회귀시험과 기존 검증 절차의 적용 범위를 정한다.
 
 `README.md`는 패키지 메타데이터에서 참조한다. `schemas/ledger-event-v1.schema.json`은 런타임·패키징·테스트가 사용하는 제품 파일이다. Credential Manager acceptance는 임시 비밀 저장소를 변경하며, private GitHub smoke는 외부 임시 브랜치를 생성·전송·삭제하므로 일반 문서 검증에 포함시키지 않는다.

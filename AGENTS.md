@@ -6,7 +6,6 @@
 아래 고정 merge 명령은 사람 실행용 참고다. 사람이 상태·설정을 명시적으로 전환하기 전에는 실행하지 않는다.
 
 작업 전에 [CONTRIBUTING.md](CONTRIBUTING.md)를 **전체 읽는다**. 공통 개발·Git·검증·권한 규약의 정본은 그 문서이며 여기에는 복제하지 않는다.
-이 파일은 K12 Paseo 운영 정본 v2.4를 Kerbe에 적용한 agent 실행 지침이다. 운영 정본 원문과 P0 실측·복구 기록은 repo 밖 사람 운영 자료에 있으며 여기에 복제하지 않는다.
 
 시작 순서:
 1. CONTRIBUTING의 작업 전 상태 확인 절차를 수행한다.
@@ -16,6 +15,16 @@
 
 진행 중 CLI 설계 기록: [.ai/tasks/docs-cli-design.md](.ai/tasks/docs-cli-design.md).
 기기 간 전달 기록: [SYNC](SYNC.md). 나머지 문서 지도는 CONTRIBUTING을 따른다.
+
+## 문서 정본 관계
+
+- CONTRIBUTING: 사람과 AI의 공통 개발·Git·검증·안전 규약과 Kerbe 검증 절차(Python 환경 격리 포함)의 정본.
+- AGENTS(이 파일): K12 Paseo 운영 정본 v2.4를 Kerbe에 적용한 agent 실행 지침의 정본. worktree·writer·handoff·merge·리뷰·Ready·runtime·보존을 다룬다.
+- v2.4: repo 밖 사람 운영 자료에 있는 K12 운영 모델의 상위 정본. 원문·P0 실측·복구 기록은 여기에 복제하지 않는다. 이 파일이 v2.4보다 느슨하다고 확인되면 v2.4를 따르고 차이를 사람에게 보고한다.
+- 우선순위: 권한·안전 범위 안의 사람의 현재 명시 지시 → 안전·권한·보존 규칙 → 담당 범위의 정본(공통 개발 규약은 CONTRIBUTING, K12 운영은 이 파일·v2.4).
+- 충돌 처리: 둘 다 지킬 수 있으면 둘 다 지킨다. 아니면 권한이 좁고 데이터를 보존하며 사람 승인을 요구하는 쪽을 따른다. 그래도 판단할 수 없으면 해당 경로를 멈추고 충돌 위치·checkpoint를 task·PR에 남겨 사람에게 묻는다. agent는 문서를 임의로 고쳐 충돌을 해소하지 않으며 지침 변경은 트리거 6번 리뷰 대상이다.
+- Kerbe 적용 결정: CONTRIBUTING 2절의 "짧은 진입점"은 공통 규약 1~9절을 복제하지 않는다는 뜻으로 적용하고 K12 운영 규칙은 이 파일에 둔다. handoff는 v2.4의 `docs/tasks/` 대신 기존 `.ai/tasks/`를 쓴다.
+- 브랜치 이름: agent가 새 이름을 정하면 CONTRIBUTING 5절의 `<type>/<kebab>`을 쓴다. PR 없는 버릴 조사만 v2.4의 `spike/`를 쓴다. Paseo가 자동 생성했거나 사람이 지정해 준비한 task worktree의 branch는 5절 type 밖의 이름(예: `bootstrap/...`)이어도 그대로 쓰고 agent가 개명하지 않는다. commit 형식은 branch 이름과 무관하게 CONTRIBUTING 6절을 따른다.
 
 ## 적용 범위
 
@@ -37,11 +46,9 @@
 4. 중단·교대 전에 상태를 기록하고 의도한 변경을 commit·push한다.
 5. main에는 사람이 명시적으로 승인한 대상만 반영한다.
 
-교대 전에 이전 writer의 명령·하위 agent·heartbeat 종료를 확인한다.
-source 변경은 commit한다. 비밀값·ignored runtime을 commit하지 않는다.
-workflow patch 예외는 아래 보존 규칙을 따른다.
+교대 전에 이전 writer의 명령·하위 agent·heartbeat 종료를 확인한다. 검증 결과는 통과 / 실패 / 미실행으로 구분한다.
+source 변경은 commit한다. 비밀값·ignored runtime을 commit하지 않는다. workflow patch 예외는 아래 보존 규칙을 따른다.
 push 실패와 local-only commit을 기록하며 백업 완료로 표시하지 않는다.
-검증 결과는 통과 / 실패 / 미실행으로 구분한다.
 
 ## 재개
 
@@ -52,19 +59,14 @@ push 실패와 local-only commit을 기록하며 백업 완료로 표시하지 �
 5. 기록된 Next부터 진행한다.
 
 compaction 후에도 위 상태를 재확인한다. 정상적이면 같은 세션을 이어간다.
-역할·provider 변경, 문맥 혼선, 제약 망각, 반복 실패는 세션 교체 신호다.
-추가 agent는 사람이 요청한 범위에서만 생성한다. shell·CLI도 동일하다.
+역할·provider 변경, 문맥 혼선, 제약 망각, 반복 실패는 세션 교체 신호다. 추가 agent는 사람이 요청한 범위에서만 생성한다. shell·CLI도 동일하다.
 
 ## Handoff
 
-- task 기록 경로는 CONTRIBUTING 2절의 `.ai/tasks/<type>-<task-name>.md`다.
-- M·L slice·R은 시작 시 추적되는 task를 기본으로 만든다. 유효한 PR handoff가 있으면 중복 생성하지 않는다.
-- S는 미완료로 교대할 때 task를 만든다.
-- 목표·Acceptance·기준 SHA·writer·주요 결정·완료 commit·검증·Next·함정을 적는다.
-- runtime 식별자와 필요한 데이터 보존 상태를 남긴다. 비밀값은 쓰지 않는다.
+- task 기록 경로는 CONTRIBUTING 2절의 `.ai/tasks/<type>-<task-name>.md`다. M·L slice·R은 시작 시 추적되는 task를 기본으로 만든다. 유효한 PR handoff가 있으면 중복 생성하지 않는다. S는 미완료로 교대할 때 task를 만든다.
+- 목표·Acceptance·기준 SHA·writer·주요 결정·완료 commit·검증·Next·함정을 적는다. runtime 식별자와 필요한 데이터 보존 상태를 남긴다. 비밀값은 쓰지 않는다.
 - task는 대체로 한 화면으로 유지하고 원격 복원이 가능하게 push한다.
-- task의 지속할 정보를 PR·정본으로 옮겨 저장을 확인한 뒤 task를 삭제한다.
-- 삭제 직후부터 Draft 여부와 관계없이 진행 기록은 PR에 남긴다.
+- task의 지속할 정보를 PR·정본으로 옮겨 저장을 확인한 뒤 task를 삭제한다. 삭제 직후부터 Draft 여부와 관계없이 진행 기록은 PR에 남긴다.
 - 세션 종료 때문에 삭제한 task를 다시 만들지 않는다. task와 PR에 별개 최신 handoff를 유지하지 않는다.
 - 사람이 응답하지 않으면 승인된 목표·범위의 독립적인 일만 진행한다.
 - 필요한 질문을 묶고 checkpoint와 차단 사유를 task·PR에 남긴 뒤 막힌 경로를 멈춘다.
@@ -119,12 +121,15 @@ gh pr merge <PR_NUMBER> --repo shotgun1107/kerbe --squash --match-head-commit <A
 - 같은 worktree 검증은 writer와 충돌하는 실행이 끝난 뒤 한다.
 - 원본 Local에서는 고정 SHA의 Git 객체만 정적으로 읽는다.
 - 독립 실행은 요청받아 준비한 detached SHA·별도 config·DB 환경에서만 한다.
+- Ready 직전에 `git fetch origin`으로 최신 `origin/main` full SHA를 확인하고 PR에 기록된 base와 대조한다. 앞섰으면 위 base 갱신 절차로 반영한다.
+- 반영 등으로 후보 SHA가 바뀌면 관련 check를 다시 실행하고 리뷰 SHA 이후 diff와 영향 맥락을 재리뷰해 PR 기록을 갱신한다.
+- PR head·CI check·리뷰 코멘트는 후보 full SHA 기준으로 GitHub에서 실제 조회한다(`gh pr view`·`gh pr checks` 등). 조회 실패·권한 부족·pending·skipped·neutral은 확인 완료가 아니며 Ready를 보류한다.
 - task 승격·삭제 후 만든 최종 후보 SHA에 필수 검사·리뷰의 PR 기록을 연결하고 Ready로 전환한다. 필요한 리뷰의 PR 기록이 없으면 Ready로 전환하지 않는다.
 
 ## Setup과 runtime
 
 - Kerbe에는 paseo.json·Makefile·scripts/dev-setup·lockfile·.env.example이 없다. 존재한다고 가정하지 않는다.
-- setup은 아래 지도의 pip 명령을 사용한다. 의존성은 pyproject.toml 범위 지정만 있고 고정 lockfile이 없다.
+- setup은 CONTRIBUTING 검증 절차의 worktree별 `.venv` 생성·editable 설치와 import 확인이다. 다른 worktree·원본 checkout의 환경이나 설치본으로 검사하지 않는다. 의존성은 pyproject.toml 범위 지정만 있고 고정 lockfile이 없다.
 - setup 변경(paseo.json·setup script 추가 포함)은 먼저 merge해 새 worktree가 읽도록 한다.
 - setup에서 전체 테스트/빌드를 하지 않는다.
 - 기존 .env는 유지한다. Kerbe는 현재 .env를 요구하지 않는다.
@@ -153,12 +158,10 @@ gh pr merge <PR_NUMBER> --repo shotgun1107/kerbe --squash --match-head-commit <A
 
 ## Docker와 보존
 
-Kerbe는 현재 Docker·Compose를 사용하지 않는다. 첫 네 항목은 도입할 때 적용하며 도입 자체가 트리거 6번 대상이다.
+Kerbe는 현재 Docker·Compose를 사용하지 않는다. 첫 두 항목은 도입할 때 적용하며 도입 자체가 트리거 6번 대상이다.
 
-- rootless를 유지하고 개발 포트는 127.0.0.1의 고포트만 게시한다.
-- DB·volume·Compose project를 worktree별로 분리한다. 공유 DB·고정 container_name을 쓰지 않는다.
-- source 쓰기가 필요하고 이미지가 지원할 때만 container UID 0을 우선 검토한다.
-- DB·cache는 named volume을 우선한다. 필요한 영속 데이터는 teardown 삭제 범위 밖에 둔다.
+- rootless를 유지하고 개발 포트는 127.0.0.1의 고포트만 게시한다. source 쓰기가 필요하고 이미지가 지원할 때만 container UID 0을 우선 검토한다.
+- DB·volume·Compose project를 worktree별로 분리한다. 공유 DB·고정 container_name을 쓰지 않는다. DB·cache는 named volume을 우선한다. 필요한 영속 데이터는 teardown 삭제 범위 밖에 둔다.
 - 일시중단은 worktree 유지다. 7일 경과나 push 완료만으로 archive하지 않는다.
 - archive 전 종료 결정·미보존 source/commit 없음·필요한 runtime 보존·관련 실행 종료를 확인한다.
 - 자동 archive 또는 Acceptance·검증 근거에 필요한 데이터는 Ready 전에 보존한다. external volume은 백업이 아니다.
@@ -177,9 +180,9 @@ Kerbe는 현재 Docker·Compose를 사용하지 않는다. 첫 네 항목은 도
 
 | 항목 | Kerbe 실제 값 |
 |---|---|
-| setup | `python -m pip install .`, 개발용 `python -m pip install -e .` |
-| test | `python -m unittest discover -s tests -t .` |
-| package/build check | `python -m pip wheel --no-deps . --wheel-dir dist` |
+| setup | 개발: worktree `.venv`에 `python -m pip install -e .`. 일반 설치 검증: 별도 임시 venv 또는 CI에서 `python -m pip install .`. 절차는 CONTRIBUTING 검증 절차 |
+| test | import 확인 후 `.venv`의 python으로 `python -m unittest discover -s tests -t .` |
+| package/build check | `.venv`의 python으로 `python -m pip wheel --no-deps . --wheel-dir dist` |
 | lint / typecheck | 없음. CI에도 정의되지 않음 |
 | dev / db-up / migration | 별도 명령 없음. DB는 로컬 SQLite이며 `src/codex_usage/storage/schema.py`의 `DATABASE_VERSION` 기준으로 `src/codex_usage/storage/sqlite.py` 연결 시 자동 적용된다. 실제 사용자 DB의 migration은 승인 범위를 확인한다 |
 | task / STATE | `.ai/tasks/`. STATE.md 없음. 감사 기록은 [STATE_AUDIT_2026-09-18](STATE_AUDIT_2026-09-18.md) |
