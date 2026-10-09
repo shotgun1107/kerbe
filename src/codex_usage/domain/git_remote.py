@@ -131,7 +131,10 @@ def _looks_local(remote: str) -> bool:
 
 
 def _parse_url_remote(remote: str) -> tuple[str, int | None, str]:
-    parsed = urlsplit(remote)
+    try:
+        parsed = urlsplit(remote)
+    except ValueError as error:
+        raise RemoteNormalizationError("remote contains an invalid URL") from error
     scheme = parsed.scheme.lower()
     if scheme == "file":
         raise AssertionError("file remotes must be handled before URL parsing")

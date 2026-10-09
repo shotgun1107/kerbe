@@ -20,14 +20,14 @@
 
 - Branch `fix/malformed-remote-errors`, base `efd539a6ab5cd05a2c7f33cf3b8db13c021458be`(= 작업 시작 시 `origin/main`).
 - 순차 Writer 교대: Phase1 Claude(Opus 5.5) → Phase2 Codex. 한 시점에 writer는 하나다.
-- 이 파일 작성 시점의 writer는 Claude이며 교대 대기 상태다. 이 checkpoint의 commit/push/Draft PR과 Claude 실행 종료를 Supervisor가 확인한 뒤 Codex가 writer를 인수한다. Claude는 이후 새 요청 없이는 다시 쓰지 않는다.
-- Phase1(Claude): 격리 runtime 준비, baseline, RED 회귀시험 추가, 이 handoff 작성은 완료했다. 프로덕션 source는 수정하지 않았다. checkpoint commit/push/Draft PR 전달과 실행 종료는 이 파일 작성 이후 단계이므로 Git·PR 상태로 실제 확인한다.
+- 현재 유일한 source writer는 Codex다. Supervisor의 Claude idle·종료 확인과 복원 gate 승인을 받아 기존 worktree를 인수했다. Claude는 다시 쓰지 않는다. 추가 agent/worktree는 만들지 않았다.
+- Phase1(Claude): 격리 runtime, baseline, RED 회귀시험과 handoff를 완료했다. checkpoint `ce96e381385bfc09829819309c1381c8ddf0a529`는 local/remote/PR #5 HEAD 일치·clean으로 확인했다. PR은 OPEN·Draft이며 checkpoint의 Windows/Ubuntu CI는 모두 FAILURE다(실패 상세는 조회하지 않음).
 - 이 handoff를 담은 checkpoint commit은 자기 SHA를 파일에 담을 수 없다. `git log --oneline efd539a..origin/fix/malformed-remote-errors`로 확인한다.
 
 ## 결정
 
 - 수정 위치는 `_parse_url_remote` 한 곳. 기존 port 처리(`parsed.port`의 `ValueError` → `RemoteNormalizationError`)와 같은 형태로 `urlsplit` 호출을 감싼다. 호출부(collect, project_attribution)는 이미 `RemoteNormalizationError`를 잡으므로 변경하지 않는다.
-- RED의 세 오류는 모두 `git_remote.py:134`의 `urlsplit`에서 발생했다. `parsed.hostname`·`parsed.path` 쪽 추가 예외 여부는 Phase2에서 확인한다.
+- RED의 세 오류는 모두 `urlsplit`에서 발생했다. Phase2에서 로컬 Python 3.14의 hostname accessor는 문자열 분리/소문자화이고 path는 결과 필드임을 읽기 확인했다. 추가 예외 변환은 필요하지 않아 `urlsplit`만 감쌌다. Python 3.12의 실제 실행 판정은 CI에 맡긴다.
 
 ## Runtime
 
@@ -55,13 +55,26 @@
    - 나머지 19개 test method는 통과했다.
 - 미실행: 새 TMPDIR 전체 suite, wheel build, Python 3.12 로컬 실행, GREEN.
 
-## Next(Codex Phase2)
+## Phase2(Codex) 실제 결과 — 2026-10-10
 
-1. 시작 전 native/remote 쓰기 gate를 확인한다. Codex 기본 on-request/workspace-write에서 진행하고 Full Access는 사용할 수 없다. `git fetch` 뒤 local/remote HEAD가 이 branch의 최신 checkpoint와 같고 clean인지 확인한다.
-2. 기존 `.venv`를 재사용한다(삭제·clear 금지). `PYTHONPATH`를 해제하고 TMPDIR을 `tmp-root.txt`의 경로로 고정한다. 그 경로가 없으면 같은 규칙(`mktemp -d /tmp/kerbe-m-6f07d351-XXXXXX`, 저장소 아님·0700 확인)으로 새로 만들고 이 파일을 갱신한다.
-3. `_parse_url_remote`에서 `urlsplit`을 `try/except ValueError`로 감싸 `RemoteNormalizationError`로 변환한다(`from error`). 다른 계약은 바꾸지 않는다.
-4. 선택 module 2개 GREEN → 전체 `unittest discover -s tests -t .` → `pip wheel --no-deps . --wheel-dir <runtime>/wheels`를 실행하고 결과를 이 파일에 기록한다.
-5. commit/push 뒤 Draft PR CI(Windows·Ubuntu, 3.12)를 확인한다. 이 task를 최종 PR handoff로 승격하거나 삭제하는 일은 Codex 마무리 단계에서 한다.
+- 실제 모드: Codex 0.160.1 / gpt-6.1-sol / medium / on-request / workspace-write(network=false). Full Access·설정 변경·persistent allow·wrapper 우회 없음. native merge 차단 증거는 Supervisor가 대조했으며 새 위험 probe는 하지 않았다.
+- source 수정 전 gate: clean/checkpoint 확인 → task branch no-op 일반 push `Everything up-to-date` → PR #5 provenance comment 게시 및 GET 동일 확인(https://github.com/shotgun1107/kerbe/pull/5#issuecomment-6086175610) → task branch fetch 후 local/origin HEAD 동일·clean 확인.
+- 구현: `_parse_url_remote`의 `urlsplit(remote)`만 `try/except ValueError`로 감싸 `RemoteNormalizationError("remote contains an invalid URL") from error`로 변환. API·URL 형태·출력 계약 및 호출부 변경 없음.
+- 아래 실행은 모두 기존 `.venv`, `env -u PYTHONPATH TMPDIR=/tmp/kerbe-m-6f07d351-CYllHj`를 사용했다. 기존 로그/fixture를 덮어쓰거나 삭제하지 않았다.
+  1. RED 재현 1회: `-m unittest -v tests.unit.test_git_remote tests.unit.test_project_attribution_engine` → Ran 21, FAILED(errors=3), exit 1. Phase1과 같은 두 정규화 subcase와 attribution 한 건(`logs/codex-red.log`).
+  2. 최소 수정 후 같은 선택 module GREEN: Ran 21, OK, exit 0(`logs/codex-green.log`).
+  3. `-m unittest discover -s tests -t .` 1회: Ran 184, OK(skipped=2), exit 0(`logs/codex-full.log`). Windows 전용 desktop discovery·Credential Manager 두 검사는 Linux skip이며 통과로 세지 않는다. 합성 private smoke unittest는 포함되지만 외부 smoke/실제 credential store는 실행하지 않았다.
+  4. `-m pip wheel --no-cache-dir --no-deps . --wheel-dir .venv/k12-m-runtime/wheels`: sandbox에서는 격리 build dependency의 PyPI DNS 실패로 exit 1(`logs/codex-wheel.log`). 동일 명령을 정상 개별 승인 후 실행해 exit 0(`logs/codex-wheel-network.log`). cache는 사용하지 않았으며 임시 build 자료는 task TMPDIR 안에서 처리됐다.
+- wheel: `kerbe-0.1.0-py3-none-any.whl`, SHA-256 `55fcf55fbb3c5a5590ec1b670eb065c566877d94c98055aa336cfe468f088bbb`. 압축 내부 source에 수정 포함을 확인했다.
+- `git diff --check` 통과. 새 TMPDIR·venv 재생성·서비스/운영 데이터 접근 없음. 전체 suite는 성공 뒤 반복하지 않았다.
+- 권한 기록(이 기록 시점): Phase2 명령별 escalation 요청 6회(no-op push, provenance POST, provenance GET, fetch, wheel, 기존 PR GET), 모두 허용·성공. sandbox 실패 3건(push DNS, comment API 연결, wheel PyPI DNS). 복원 턴의 escalation 2회는 별도다. 이후 전달 명령의 승인/실패와 최종 SHA는 PR handoff에 기록한다.
+
+## Next(Codex 전달)
+
+1. 이 source/task diff 전체를 검토하고 명시 stage 후 한국어 Conventional commit + `Agent: codex`로 commit한다. task branch만 일반 push하고 실제 remote/PR HEAD를 확인한다.
+2. 목표/Acceptance/실제 검사/Next/runtime/보존자료/미확인을 기존 Draft PR #5 본문으로 승격한다. `gh api` REST PATCH + GET으로 저장을 확인한 후 이 작업에서 추가한 task 파일 하나만 삭제해 별도 commit/push한다. 삭제 commit은 source 변경 없는 최종 후보 H이며 전체 suite를 근거 없이 재실행하지 않는다.
+3. 최종 H의 local/remote/PR HEAD·clean·Draft·CI 상태를 확인하고 PR에 H를 기록한다. H의 CI가 2분 내 완료하지 않으면 대기 중으로 전달한다. 독립 리뷰는 Supervisor가 실행 종료 후 수행하며 현재 미실행이다.
+4. 승격 후 현재 handoff 정본은 PR #5 하나로 유지한다. AI Ready/merge/main push/force/Archive/권한 변경은 하지 않는다.
 
 ## 주의점
 
