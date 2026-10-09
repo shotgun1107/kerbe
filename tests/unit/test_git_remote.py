@@ -80,6 +80,17 @@ class NormalizeRemoteTests(unittest.TestCase):
                 with self.assertRaises(RemoteNormalizationError):
                     normalize_remote(remote)
 
+    def test_malformed_ipv6_url_remotes_are_rejected(self) -> None:
+        malformed_remotes = (
+            "ssh://[2001:db8::1/repo.git",
+            "https://[not-an-ip]/repo.git",
+        )
+
+        for remote in malformed_remotes:
+            with self.subTest(remote=remote):
+                with self.assertRaises(RemoteNormalizationError):
+                    normalize_remote(remote)
+
 
 class ResolveRemoteTests(unittest.TestCase):
     def test_network_origin_wins_over_other_remotes(self) -> None:

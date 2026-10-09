@@ -249,6 +249,41 @@ class ProjectAttributionEngineTests(unittest.TestCase):
             "github.com/example/project",
         )
 
+    def test_malformed_session_remote_falls_back_to_cwd_git_probe(self) -> None:
+        metadata_by_thread = {
+            "thread": metadata(
+                "thread",
+                root="thread",
+                remote="ssh://[2001:db8::1/repo.git",
+                cwd="workdir",
+            )
+        }
+        probe_result = GitProbeResult(
+            GitProbeStatus.REPOSITORY,
+            "repository-root",
+            RemoteResolution(
+                RemoteResolutionKind.UNIQUE_REMOTE,
+                "github.com/example/project",
+                ("github.com/example/project",),
+            ),
+        )
+        engine = ProjectAttributionEngine(
+            metadata_by_thread,
+            inventory(),
+            git_probe=lambda _path: probe_result,
+        )
+
+        result = engine.attribute_all((checkpoint("thread", "turn"),))[0]
+
+        self.assertEqual(
+            result.attribution.resolution,
+            ProjectResolutionKind.UNIQUE_REMOTE,
+        )
+        self.assertEqual(
+            result.attribution.project_identity,
+            "github.com/example/project",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
