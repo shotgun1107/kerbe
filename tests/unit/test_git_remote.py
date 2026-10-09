@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import traceback
 import unittest
 
 from codex_usage.domain.git_remote import (
@@ -79,6 +80,31 @@ class NormalizeRemoteTests(unittest.TestCase):
             with self.subTest(remote=remote):
                 with self.assertRaises(RemoteNormalizationError):
                     normalize_remote(remote)
+
+    def test_malformed_ipv6_url_remotes_are_rejected(self) -> None:
+        malformed_remotes = (
+            "ssh://[2001:db8::1/repo.git",
+            "https://[not-an-ip]/repo.git",
+        )
+
+        for remote in malformed_remotes:
+            with self.subTest(remote=remote):
+                with self.assertRaises(RemoteNormalizationError):
+                    normalize_remote(remote)
+
+    def test_invalid_url_traceback_does_not_expose_userinfo(self) -> None:
+        marker = "K12_SYNTHETIC_REMOTE_SECRET"
+        remote = f"https://k12-user:{marker}@exa\uff0fmple.com/repo.git"
+
+        try:
+            normalize_remote(remote)
+        except RemoteNormalizationError as error:
+            self.assertEqual(str(error), "remote contains an invalid URL")
+            formatted = "".join(traceback.format_exception(error))
+        else:
+            self.fail("malformed URL must raise RemoteNormalizationError")
+
+        self.assertNotIn(marker, formatted)
 
 
 class ResolveRemoteTests(unittest.TestCase):
